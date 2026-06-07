@@ -1,0 +1,1604 @@
+﻿<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sauerstoffgehalt – Teil A</title>
+<style>
+  html { font-size: 10px; }
+  body { margin: 0; padding: 2rem; background: #dde6ee; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════
+     BRICKS CODE ELEMENT – alles ab hier einfügen
+═══════════════════════════════════════════════════ -->
+<style>
+  .lncu-o2sim-root {
+    font-size: 1.6rem;
+    font-family: Arial, Helvetica, sans-serif;
+    width: 100%;
+    background-color: var(--bricks-color-blue-600, #eef2f7);
+    color: var(--bricks-color-gray-100, #333333);
+    padding: 1.5rem;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    gap: 1.5rem;
+  }
+  .lncu-o2sim-canvas-box {
+    background-color: var(--bricks-color-white, #ffffff);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    overflow: hidden;
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+  #lncu-o2sim-canvas {
+    display: block;
+    width: 100%;
+    flex: 0 0 auto;
+  }
+  /* ── Steuerzeile unter dem Canvas: 2 Pfeil-Icon-Schalter (Phasen-Logik) ── */
+  .lncu-o2sim-control-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 1.2rem;
+    flex: 0 0 auto;
+  }
+  .lncu-o2sim-icon-switch {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.3rem;
+    font-weight: bold;
+    font-family: inherit;
+    line-height: 1;
+    color: var(--bricks-color-akzent-100, #ff6a00);
+    background-color: var(--bricks-color-akzent-600, #fff0e5);
+    border: 0.15rem solid var(--bricks-color-akzent-100, #ff6a00);
+    border-radius: 0.6rem;
+    padding: 0.5rem 1.2rem;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease, opacity 0.15s ease;
+  }
+  .lncu-o2sim-icon-switch:hover:not(:disabled) {
+    background-color: var(--bricks-color-akzent-100, #ff6a00);
+    color: var(--bricks-color-white, #ffffff);
+  }
+  .lncu-o2sim-icon-switch:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+  .lncu-o2sim-switch-icon {
+    display: block;
+    flex-shrink: 0;
+  }
+  .lncu-o2sim-switch-arrow {
+    flex-shrink: 0;
+  }
+  .lncu-o2sim-sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  /* ── Spalte 1: Flaggen-Platzhalter für Sprachumschaltung, alle untereinander ── */
+  .lncu-o2sim-flags-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 0 0 auto;
+  }
+  .lncu-o2sim-flags-label {
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin-bottom: 0.2rem;
+  }
+  .lncu-o2sim-flag-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 3.6rem;
+    aspect-ratio: 3 / 2;
+    background: var(--bricks-color-blue-400, #cbd9e6);
+    border: 0.1rem solid var(--bricks-color-blue-300, #a9bfd6);
+    border-radius: 0.4rem;
+    font-size: 2.2rem;   /* praktisches Maximum: Button-Innenhöhe ≈ 2,2rem (2,4rem Höhe − Rahmen) — größer würde den Rahmen überdecken */
+    line-height: 1;
+    font-weight: bold;
+    color: var(--bricks-color-blue-100, #2e4760);
+    cursor: pointer;
+    transition: border-color 0.15s, background-color 0.15s;
+  }
+  .lncu-o2sim-flag-placeholder:hover {
+    border-color: var(--bricks-color-akzent-100, #ff6a00);
+  }
+  .lncu-o2sim-flag-placeholder.lncu-o2sim-flag-active {
+    border: 0.2rem solid var(--bricks-color-akzent-100, #ff6a00);
+    background: var(--bricks-color-akzent-600, #fff0e5);
+  }
+  /* ── Spalte 3: senkrechter Schieberegler – auf das Funktionale reduziert ── */
+  .lncu-o2sim-slider-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;   /* zentriert Inhalt inkl. Regler über die volle App-Höhe */
+    gap: 0.8rem;
+    flex: 0 0 auto;
+  }
+  .lncu-o2sim-slider {
+    writing-mode: vertical-lr;   /* senkrecht: Minimum unten, Maximum oben */
+    direction: rtl;
+    -webkit-appearance: slider-vertical;
+    appearance: slider-vertical;
+    width: 0.8rem;
+    /* Höhe wird in resize() responsiv auf 80 % der App-Höhe gesetzt (10 % Freiraum oben/unten) */
+    cursor: pointer;
+    accent-color: var(--bricks-color-akzent-100, #ff6a00);
+  }
+  .lncu-o2sim-pct-label {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--bricks-color-akzent-100, #ff6a00);
+    text-align: center;
+    display: inline-block;
+    min-width: 7rem;   /* feste Breite für den längsten Wert "100 % O₂" → kein Layoutsprung bei 95 %→100 % */
+    font-variant-numeric: tabular-nums;
+  }
+  .lncu-o2sim-scale-label {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--bricks-color-gray-200, #999999);
+    text-align: center;
+  }
+</style>
+
+<div class="lncu-o2sim-root">
+  <!-- Spalte 1 (schmal): Platzhalter für Sprachumschaltung – alle Flaggen untereinander -->
+  <div class="lncu-o2sim-flags-col" aria-label="Sprachauswahl">
+    <span id="lncu-o2sim-flags-label" class="lncu-o2sim-flags-label">Sprache</span>
+    <span class="lncu-o2sim-flag-placeholder" data-lang="ur"  title="Pakistan – Urdu">🇵🇰</span>
+    <span class="lncu-o2sim-flag-placeholder" data-lang="ar"  title="Irak – Arabisch">🇮🇶</span>
+    <span class="lncu-o2sim-flag-placeholder" data-lang="tr"  title="Türkei – Türkisch">🇹🇷</span>
+    <span class="lncu-o2sim-flag-placeholder" data-lang="sq"  title="Kosovo – Albanisch">🇽🇰</span>
+    <span class="lncu-o2sim-flag-placeholder" data-lang="sq"  title="Albanien – Albanisch">🇦🇱</span>
+    <span class="lncu-o2sim-flag-placeholder" data-lang="prs" title="Afghanistan – Dari">🇦🇫</span>
+    <span class="lncu-o2sim-flag-placeholder" data-lang="ar"  title="Marokko – Arabisch">🇲🇦</span>
+    <span class="lncu-o2sim-flag-placeholder" data-lang="uk"  title="Ukraine – Ukrainisch">🇺🇦</span>
+    <span class="lncu-o2sim-flag-placeholder" data-lang="en"  title="England – Englisch">🇬🇧</span>
+    <span class="lncu-o2sim-flag-placeholder" data-lang="ru"  title="Russland – Russisch">🇷🇺</span>
+    <span class="lncu-o2sim-flag-placeholder" data-lang="ar"  title="Syrien – Arabisch">🇸🇾</span>
+    <span class="lncu-o2sim-flag-placeholder" data-lang="ro"  title="Rumänien – Rumänisch">🇷🇴</span>
+  </div>
+
+  <!-- Spalte 2 (maximaler Raum): Spritzen-Canvas, L-förmig, Legende künftig unten links im Canvas -->
+  <div class="lncu-o2sim-canvas-box">
+    <canvas id="lncu-o2sim-canvas"></canvas>
+
+    <!-- Steuerzeile: Phase 1 (Spritze 1 → Spritze 2) / Phase 2 (Restluft Spritze 2 → Spritze 1) -->
+    <div class="lncu-o2sim-control-row" role="group" aria-label="Steuerung: Gasüberführung zwischen den Spritzen">
+      <button type="button" id="lncu-o2sim-btn-toS2" class="lncu-o2sim-icon-switch"
+              title="Start: Stempel von Spritze 1 drücken – Inhalt nach Spritze 2 überführen">
+        <!-- Symbol 1: kleine waagerechte Spritze, Öffnung (Düse) nach rechts -->
+        <svg class="lncu-o2sim-switch-icon" width="26" height="26" viewBox="0 0 28 28" aria-hidden="true">
+          <rect x="2" y="11" width="2" height="6" fill="currentColor"/>
+          <line x1="4" y1="14" x2="7" y2="14" stroke="currentColor" stroke-width="2"/>
+          <rect x="7" y="10" width="13" height="8" rx="1.5" fill="none" stroke="currentColor" stroke-width="2"/>
+          <path d="M20,11 L25,14 L20,17 Z" fill="currentColor"/>
+        </svg>
+        <span class="lncu-o2sim-switch-arrow" aria-hidden="true">→</span>
+        <!-- Symbol 2: dieselbe Spritze, um -90° gedreht → senkrecht, Öffnung nach oben -->
+        <svg class="lncu-o2sim-switch-icon" width="26" height="26" viewBox="0 0 28 28" aria-hidden="true">
+          <g transform="rotate(-90 14 14)">
+            <rect x="2" y="11" width="2" height="6" fill="currentColor"/>
+            <line x1="4" y1="14" x2="7" y2="14" stroke="currentColor" stroke-width="2"/>
+            <rect x="7" y="10" width="13" height="8" rx="1.5" fill="none" stroke="currentColor" stroke-width="2"/>
+            <path d="M20,11 L25,14 L20,17 Z" fill="currentColor"/>
+          </g>
+        </svg>
+        <span class="lncu-o2sim-sr-only">Start: Inhalt von Spritze 1 nach Spritze 2 überführen</span>
+      </button>
+      <button type="button" id="lncu-o2sim-btn-toS1" class="lncu-o2sim-icon-switch" disabled
+              title="Start: Restluft aus Spritze 2 zurück nach Spritze 1 überführen">
+        <!-- Symbol 2: kleine senkrechte Spritze, Öffnung (Düse) nach oben -->
+        <svg class="lncu-o2sim-switch-icon" width="26" height="26" viewBox="0 0 28 28" aria-hidden="true">
+          <g transform="rotate(-90 14 14)">
+            <rect x="2" y="11" width="2" height="6" fill="currentColor"/>
+            <line x1="4" y1="14" x2="7" y2="14" stroke="currentColor" stroke-width="2"/>
+            <rect x="7" y="10" width="13" height="8" rx="1.5" fill="none" stroke="currentColor" stroke-width="2"/>
+            <path d="M20,11 L25,14 L20,17 Z" fill="currentColor"/>
+          </g>
+        </svg>
+        <span class="lncu-o2sim-switch-arrow" aria-hidden="true">→</span>
+        <!-- Symbol 1: dieselbe Spritze zurückgedreht → waagerecht, Öffnung nach rechts -->
+        <svg class="lncu-o2sim-switch-icon" width="26" height="26" viewBox="0 0 28 28" aria-hidden="true">
+          <rect x="2" y="11" width="2" height="6" fill="currentColor"/>
+          <line x1="4" y1="14" x2="7" y2="14" stroke="currentColor" stroke-width="2"/>
+          <rect x="7" y="10" width="13" height="8" rx="1.5" fill="none" stroke="currentColor" stroke-width="2"/>
+          <path d="M20,11 L25,14 L20,17 Z" fill="currentColor"/>
+        </svg>
+        <span class="lncu-o2sim-sr-only">Start: Restluft aus Spritze 2 zurück nach Spritze 1 überführen</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Spalte 3 (schmal, minimal): O2-Symbol – Wert – Regler – Skalenende – O2-Symbol -->
+  <div class="lncu-o2sim-slider-col">
+    <svg width="28" height="28" viewBox="0 0 28 28" style="flex-shrink:0">
+      <!-- Verlauf identisch zur blauen O2-Kugel in Legende/Simulation
+           (drawLegendSphere/drawParticleList) — fachliche Simulationsfarbe,
+           hier als SVG-Pendant nachgebildet, Symbolgröße unverändert -->
+      <defs>
+        <radialGradient id="lncu-o2sim-o2-icon-grad" cx="50%" cy="50%" r="43%" fx="37%" fy="36%">
+          <stop offset="0%"   stop-color="#cfe3ff"/>
+          <stop offset="50%"  stop-color="#2f6fd6"/>
+          <stop offset="100%" stop-color="#0d3a73"/>
+        </radialGradient>
+      </defs>
+      <circle cx="14" cy="14" r="12" fill="url(#lncu-o2sim-o2-icon-grad)" stroke="#06264a" stroke-width="1.4"/>
+      <text x="14" y="19" text-anchor="middle" fill="white" font-size="11"
+            font-weight="bold" font-family="Arial">O₂</text>
+    </svg>
+    <span id="lncu-o2sim-label" class="lncu-o2sim-pct-label">20&thinsp;% O₂</span>
+    <span class="lncu-o2sim-scale-label">100&thinsp;%</span>
+    <input type="range" id="lncu-o2sim-slider" class="lncu-o2sim-slider"
+           min="0" max="20" step="1" value="10">
+    <span class="lncu-o2sim-scale-label">0&thinsp;%</span>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  function init() {
+    const canvas  = document.getElementById('lncu-o2sim-canvas');
+    const slider  = document.getElementById('lncu-o2sim-slider');
+    const labelEl = document.getElementById('lncu-o2sim-label');
+    const btnToS2 = document.getElementById('lncu-o2sim-btn-toS2');
+    const btnToS1 = document.getElementById('lncu-o2sim-btn-toS1');
+    const flagsLabelEl = document.getElementById('lncu-o2sim-flags-label');
+    const flagEls      = document.querySelectorAll('.lncu-o2sim-flag-placeholder');
+    if (!canvas || !slider || !labelEl || !btnToS2 || !btnToS1) return;
+    const ctx = canvas.getContext('2d');
+
+    /* ── Sprachumschaltung ──
+       Übersetzte Texte je Sprachcode (ISO 639; "prs" = Dari nach
+       ISO 639-3, da Dari kein eigenes 639-1-Kürzel hat). Es werden
+       bewusst nur ausgeschriebene Begriffe übersetzt — Einheiten/
+       Symbole wie "mL", "%" und "O₂" bleiben überall unverändert
+       (siehe Prozent-/Skalenbeschriftungen, die rein aus Zahl+Symbol
+       bestehen und daher hier keinen Eintrag benötigen).
+       Albanisch (sq) und Dari (prs) sind Erstentwürfe — vor dem
+       produktiven Einsatz von Muttersprachler:innen gegenlesen lassen. */
+    const TRANSLATIONS = {
+      de:  { flagsLabel: 'Sprache',  legendO2: 'Sauerstoff', legendOther: 'anderes Gas',  legendWarmer: 'Handwärmer',              legendRust: 'Rost' },
+      en:  { flagsLabel: 'Language', legendO2: 'Oxygen',     legendOther: 'other gas',    legendWarmer: 'hand warmer',             legendRust: 'rust' },
+      ru:  { flagsLabel: 'Язык',     legendO2: 'Кислород',   legendOther: 'другой газ',   legendWarmer: 'грелка',                  legendRust: 'ржавчина' },
+      tr:  { flagsLabel: 'Dil',      legendO2: 'Oksijen',    legendOther: 'diğer gaz',    legendWarmer: 'el ısıtıcısı',            legendRust: 'pas' },
+      ar:  { flagsLabel: 'اللغة',     legendO2: 'الأكسجين',    legendOther: 'غاز آخر',       legendWarmer: 'كيس تدفئة اليد',           legendRust: 'صدأ' },
+      sq:  { flagsLabel: 'Gjuha',    legendO2: 'Oksigjen',   legendOther: 'gaz tjetër',   legendWarmer: 'ngrohës duarsh',          legendRust: 'ndryshk' },
+      ur:  { flagsLabel: 'زبان',      legendO2: 'آکسیجن',      legendOther: 'دوسری گیس',     legendWarmer: 'ہاتھ گرم کرنے والا پیکٹ',   legendRust: 'زنگ' },
+      prs: { flagsLabel: 'زبان',      legendO2: 'اکسیجن',      legendOther: 'گاز دیگر',      legendWarmer: 'گرم‌کنندهٔ دست',           legendRust: 'زنگ‌زدگی' },
+      uk:  { flagsLabel: 'Мова',     legendO2: 'Кисень',     legendOther: 'інший газ',    legendWarmer: 'грілка для рук',          legendRust: 'іржа' },
+      ro:  { flagsLabel: 'Limba',    legendO2: 'Oxigen',     legendOther: 'alt gaz',      legendWarmer: 'încălzitor de mâini',     legendRust: 'rugină' },
+    };
+    let currentLang = 'de';
+
+    function applyLanguage(lang) {
+      currentLang = TRANSLATIONS[lang] ? lang : 'de';
+      const t = TRANSLATIONS[currentLang];
+      if (flagsLabelEl) flagsLabelEl.textContent = t.flagsLabel;
+      flagEls.forEach(el => {
+        el.classList.toggle('lncu-o2sim-flag-active', el.dataset.lang === currentLang);
+      });
+    }
+    flagEls.forEach(el => {
+      el.addEventListener('click', () => applyLanguage(el.dataset.lang));
+    });
+    applyLanguage(currentLang);
+
+    /* ── Constants ── */
+    const N = 20;
+    let   R = 9;       // collision radius — updated on resize
+    const SPEED_FACTOR = 0.375;  // drosselt die Gesamtgeschwindigkeit aller Gas-Teilchen (0,75 × 0,5)
+    const ROD_LENGTH_FACTOR = 1.1;  // verlängert Stempel/T-Stück um 10 %, damit das T-Stück sichtbar aus dem Zylinder ragt
+
+    /* ── State ── */
+    let W = 0, H = 0, dpr = 1;
+    let G = {};          // geometry, recomputed on resize
+    let particles = [];
+    let nO2 = 10;   // Standard bei Start: 50 % (10 von 20 Teilchen)
+
+    /* Überführungs-Phasen: 'idle' → 'toS2' → 'doneToS2' → 'toS1' → 'doneToS1'
+       Schalter ① → ② startet Phase 1 (Inhalt Spritze 1 → Spritze 2);
+       Schalter ② → ① wird erst nach deren Abschluss freigegeben (Phase 2:
+       Restluft Spritze 2 → Spritze 1). */
+    let transferPhase = 'idle';
+    let transferAnim  = null;   // aktive Stempel-/Teilchen-Animation (Phase 1) oder null
+    let reactionAnim  = null;   // aktive O2-Verbrauchs-/Rost-Animation oder null
+    let rustSpots     = [];     // { x, y, r } in G2-Lokalkoordinaten — bleiben bis zum Ende sichtbar
+
+    /* Animationsparameter Phase 1 (Inhalt Spritze 1 → Spritze 2):
+       Beide Stempel fahren synchron innerhalb von TRANSFER_DURATION ms;
+       das komplette Volumen aus Spritze 1 (TRANSFER_VOL mL) wandert nach
+       Spritze 2 (8 → 58 mL). Pro ML_PER_PARTICLE mL übertragenen Volumens
+       wechselt eines der N Teilchen die Spritze — TRANSFER_VOL / ML_PER_PARTICLE
+       ergibt genau N, d. h. am Ende sind alle Teilchen umgezogen. */
+    const TRANSFER_DURATION = 4000;                                  // ms
+    const TRANSFER_VOL      = 50;                                    // mL
+    const ML_PER_PARTICLE   = 2.5;                                   // mL je Teilchen-Wechsel
+    const PARTICLES_TO_MOVE = TRANSFER_VOL / ML_PER_PARTICLE;        // 20
+    const TRIGGER_INTERVAL  = TRANSFER_DURATION / PARTICLES_TO_MOVE; // 200 ms
+    const FADE_OUT_MS       = 150;   // Ausblenden am Luer-Lock von Spritze 1
+    const FADE_IN_MS        = 150;   // Einblenden unterhalb des Teebeutels in Spritze 2
+    const SYRINGE2_FULL_VOL = 8 + TRANSFER_VOL;   // 58 mL — Spritze 2 nach Phase 1
+
+    /* Reaktionsphase (nach Abschluss von Phase 1, automatisch):
+       Alle O2_REACTION_INTERVAL ms verschwindet ein O₂-Teilchen (reagiert
+       mit dem Eisenpulver im Teebeutel zu Rost); dabei rückt der Kolben von
+       Spritze 2 kontinuierlich um ML_PER_O2_REACTION mL je Teilchen vor
+       (deckungsgleich mit den diskreten Verschwinde-Zeitpunkten) und ein
+       rostbrauner Fleck erscheint auf dem Beutel. Dauer hängt von der zuvor
+       eingestellten O₂-Menge ab (max. N · O2_REACTION_INTERVAL = 40 s). */
+    const O2_REACTION_INTERVAL = 2000;   // ms zwischen zwei verschwindenden O2-Teilchen
+    const ML_PER_O2_REACTION   = 2.5;    // mL Kolbenrückzug je verbrauchtem O2-Teilchen
+    const RUST_COLOR           = 'rgba(120, 72, 38, 0.55)';   // realistische, theme-feste Rostfarbe
+
+    /* ════════════════════════════════════
+       GEOMETRY
+       Layout (left → right):
+         [T-flange] [rod outside] [ear] [barrel: empty|gas] [nozzle+luer]
+         Nozzle is on the RIGHT (matches real experiment)
+         Scale: 0 mL at nozzle (right), 60 mL at barrel entrance (left)
+    ════════════════════════════════════ */
+    function computeGeometry() {
+      /* ── Dreiwegehahn als unabhängiger Anker ──
+         Größe: sechster (letzter) Feinjustierungs-Schritt — Hahn ein
+         weiteres Mal auf 95 % in x- UND y-Richtung verkleinern
+         (linearer Faktor 0,95 in beiden Richtungen, oben auf den
+         bisherigen H×0,12697-Wert):
+         valveSize = (H×0,44) × 0,75 × 0,5 × 0,9 × 0,9 × 0,95 × 0,95
+                   = H×0,12059.
+         bih landet damit bei ≈ 27,4 % des Ursprungswerts.
+         Position: rechter Rand des Hahns UND oberer Rand der gesamten
+         Baugruppe je 1/4 Hahnbreite vom Canvas-Rand entfernt. Da die
+         Spritzen-Außenkante (bih/2+bwall) weiter herausragt als der
+         Hahn-Kreis (valveR), bestimmt sie den oberen Rand — cy wird so
+         gelegt, dass GENAU diese Außenkante (oy0) den Abstand einhält.
+         Alle Spritzen-Maße werden aus der Hahn-Größe abgeleitet
+         (bih = valveSize / 1,1 — Umkehrung der bisherigen Beziehung).
+
+         ── Baugruppe hochrücken + Steuerzeile ──
+         Oberer Rand der Baugruppe wird auf die Hälfte des bisherigen
+         Werts reduziert (topMargin = valveMargin / 2) → die ganze
+         Baugruppe rückt sichtbar nach oben. Der dadurch und durch die
+         knappere untere Sicherheitsreserve (≈ 2 % statt ≈ 7 %, siehe
+         resize()/H) gewonnene Platz wird dem Canvas entzogen und einer
+         neuen Steuerzeile unterhalb des Canvas zugeschlagen. Da H jetzt
+         kleiner ausfällt, wurde der valveSize-Faktor von 0,12062 auf
+         0,125 angehoben, um das bw/bih-Verhältnis (Zylinderlänge zu
+         -durchmesser) wieder auf den zuletzt stimmigen Bereich (≈ 3,2–3,3)
+         zurückzuholen — die Hahn-Größen-Iteration musste also nach der
+         H-Änderung leicht nachgeführt werden. */
+      const valveSize   = Math.round(H * 0.125);
+      const valveMargin = valveSize / 4;
+      const topMargin   = valveMargin / 2;          // Baugruppe rückt nach oben
+      const valveS      = 0.5;   // 50 % der Original-SVG-Größe (unverändert)
+
+      const bih   = valveSize / 1.1;
+      const bwall = bih * 0.175;
+      const nozzleW = bih * 0.25;
+      const luerW   = W * 0.026;
+      const earW    = bwall * 0.75;
+      const flangeW = bih * 0.18;
+      const rodH    = bih * 0.92;
+
+      const valveR     = Math.round(bih * 0.45 * valveS);  // Kreisgehäuse-Radius
+      const valveStub  = Math.round(bih * 0.72 * valveS);  // Länge des unteren Stutzens
+      const valveShift = Math.round(luerW * 0.7);          // Hahn greift ins Luer-Lock-Gewinde
+
+      /* Hahn-Position: rechter Rand vx1 und Kreismittelpunkt aus dem Rand-Abstand */
+      const vx1 = W - valveMargin;
+      const vx0 = vx1 - valveSize;
+      const bCx = vx0 + Math.round(bih * 0.475);
+      const cy  = topMargin + bih / 2 + bwall;   // → oy0 = topMargin (Baugruppe hochgerückt)
+
+      /* Spritze 1 dockt links am Hahn an — bx1 aus Hahn-Position abgeleitet */
+      const bx1 = vx0 + valveShift - nozzleW - luerW;
+
+      const nozzleNarrow = bih * 0.155;
+      const stopfenW     = nozzleW;   // seal taper matches nozzle taper
+
+      /* verfügbare Breite links von bx1 (abzüglich Flansch + Öhrchen) → Zylinderlänge (60 mL) */
+      const bw  = Math.floor((bx1 - 4 - flangeW - earW) * 60 / 110);
+      const bx0 = bx1 - bw;
+
+      /* barrel verticals */
+      const by0 = cy - bih / 2;
+      const by1 = cy + bih / 2;
+      const oy0 = by0 - bwall;
+      const oy1 = by1 + bwall;
+
+      /* piston right face — volMl = gas volume from nozzle; animation will vary this */
+      const volMl = 50;
+      const px    = bx1 - volMl * (bw / 60);
+
+      /* rod: full barrel length (× ROD_LENGTH_FACTOR, damit T-Stück aus dem Zylinder ragt),
+         starts at left canvas edge if needed */
+      const rodX0 = Math.max(4, px - flangeW - bw * ROD_LENGTH_FACTOR);
+
+      G = {
+        cy, bx0, bx1, bw, bih, bwall, by0, by1, oy0, oy1,
+        nozzleW, luerW,
+        earW, flangeW, rodX0, rodH,
+        nozzleNarrow, stopfenW,
+        px,
+        /* gas arena for particles */
+        gx0: px + 1, gx1: bx1 - 1,
+        gy0: by0 + 1, gy1: by1 - 1,
+        vx0, vx1, bCx,
+        valveSize, valveS, valveR, valveStub,
+        /* Anschlusspunkt am unteren weiblichen Stutzen — hier dockt Spritze 2 an */
+        vBottomX: bCx,
+        vBottomY: cy + valveR + valveStub,
+      };
+    }
+
+    /* ════════════════════════════════════
+       GEOMETRY – SPRITZE 2 (senkrecht, am Hahn)
+       Lokales Koordinatensystem: identischer Aufbau wie
+       Spritze 1 (Düse/Luer zeigt in +x), Ursprung an der
+       Luer-Spitze = Anschlusspunkt am Hahn. Beim Zeichnen
+       um -90° gedreht und nach (vBottomX|vBottomY) verschoben
+       → Düse zeigt nach oben zum Hahn, Griff hängt nach unten.
+    ════════════════════════════════════ */
+    let G2 = {};
+    function computeGeometry2() {
+      /* Spritze 2 ist baugleich mit Spritze 1 — gleicher Zylinder, gleicher Stempel
+         (Vorgabe: "beide Zylinder gleich groß, beide Stempel gleich groß").
+         Nur volMl unterscheidet sich (Anfangsstellung). */
+      const { bih, bwall, nozzleW, luerW, earW, flangeW, rodH,
+              nozzleNarrow, stopfenW, bw } = G;
+
+      /* Düse/Luer zeigt in lokal +x; Luer-Spitze liegt im Ursprung (0,0) */
+      const luerX1 = 0;
+      const nozzleX1 = luerX1 - luerW;
+      const bx1 = nozzleX1 - nozzleW;
+      const bx0 = bx1 - bw;
+
+      const cy  = 0;
+      const by0 = cy - bih / 2;
+      const by1 = cy + bih / 2;
+      const oy0 = by0 - bwall;
+      const oy1 = by1 + bwall;
+
+      /* Kolben anfänglich auf 8 mL herausgezogen (Spritze 1: 50 mL).
+         Platzreserve: muss später bis 58 mL herausfahrbar sein — siehe
+         cy-Position und Seitenverhältnis in computeGeometry()/resize(). */
+      const volMl = 8;
+      const px    = bx1 - volMl * (bw / 60);
+
+      const rodX0 = px - flangeW - bw * ROD_LENGTH_FACTOR;
+
+      /* Teebeutel-Form HIER EIN FÜR ALLE MAL festsetzen (randvoll in der
+         anfänglichen 8-mL-Zone, siehe drawTeabag2) — als feste Werte in
+         G2 abgelegt, statt sie beim Zeichnen aus px/bx1/... abzuleiten.
+         So bleibt das Päckchen unverrückbar an seinem Platz, auch wenn
+         Animationen später px/Kolbenposition usw. dynamisch verändern. */
+      const teabag = {
+        x0: px - stopfenW,
+        y0: by0,
+        w:  bx1 - (px - stopfenW),
+        h:  by1 - by0,
+        r:  Math.min(bx1 - (px - stopfenW), by1 - by0) * 0.22,
+      };
+
+      G2 = {
+        cy, bx0, bx1, bw, bih, bwall, by0, by1, oy0, oy1,
+        nozzleW, luerW,
+        earW, flangeW, rodX0, rodH,
+        nozzleNarrow, stopfenW,
+        px, teabag,
+        gx0: px + 1, gx1: bx1 - 1,
+        gy0: by0 + 1, gy1: by1 - 1,
+      };
+    }
+
+    /* ── Kolbenposition zur Laufzeit setzen (Animation Phase 1/2) ──
+       volMl bestimmt px; rodX0 wird daraus neu abgeleitet, damit die
+       sichtbare Stempellänge konstant bleibt (siehe ursprüngliche
+       Herleitung in computeGeometry/computeGeometry2: rodX0 = px - flangeW - bw * ROD_LENGTH_FACTOR). */
+    function setPistonVol1(volMl) {
+      G.px  = G.bx1 - volMl * (G.bw / 60);
+      G.gx0 = G.px + 1;
+      G.rodX0 = Math.max(4, G.px - G.flangeW - G.bw * ROD_LENGTH_FACTOR);
+    }
+    function setPistonVol2(volMl) {
+      G2.px  = G2.bx1 - volMl * (G2.bw / 60);
+      G2.gx0 = G2.px + 1;
+      G2.rodX0 = G2.px - G2.flangeW - G2.bw * ROD_LENGTH_FACTOR;
+    }
+
+    /* ════════════════════════════════════
+       CANVAS RESIZE
+    ════════════════════════════════════ */
+    function resize() {
+      dpr = window.devicePixelRatio || 1;
+      W   = canvas.parentElement.clientWidth;
+      if (W < 1) return;   // skip degenerate geometry (hidden/collapsed element)
+      /* Höhe reduziert (1,15 → 1,08): Baugruppe rückt hoch + untere
+         Sicherheitsreserve auf ≈ 2 % verknappt (statt ≈ 7 %) — der so
+         eingesparte Streifen (≈ 70 px bei W = 1000) wird der neuen
+         Steuerzeile unterhalb des Canvas zugeschlagen (siehe controlRow). */
+      H   = Math.round(W * 1.08);
+      canvas.width        = Math.round(W * dpr);
+      canvas.height       = Math.round(H * dpr);
+      canvas.style.height = H + 'px';
+      /* Schieberegler: 80 % der App-Höhe (Canvas-Höhe), zentriert → 10 % Freiraum oben/unten */
+      slider.style.height = Math.round(H * 0.8) + 'px';
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      computeGeometry();
+      computeGeometry2();
+      R = Math.max(3, Math.round(
+        Math.sqrt((G.gx1 - G.gx0) * (G.gy1 - G.gy0) * 0.07 / (N * Math.PI))
+      ));
+
+      /* Größenänderung baut die Geometrie komplett neu auf (computeGeometry/
+         computeGeometry2 setzen px/rodX0/etc. immer auf den ANFANGS-Wert
+         zurück). Liefe eine Transfer- oder Reaktions-Animation noch mit
+         ihrem alten Stand weiter, würde sie die frisch berechneten
+         Kolbenpositionen sofort wieder mit veralteten Werten überschreiben
+         — sichtbar z. B. als "leere Spritze 2 mit ausgefahrenem Kolben",
+         während alle Teilchen schon wieder frisch in Spritze 1 stehen.
+         Daher: bei jeder Größenänderung sauber auf den Ausgangszustand
+         zurücksetzen, statt mit inkonsistentem Mischzustand weiterzulaufen. */
+      transferAnim    = null;
+      reactionAnim    = null;
+      rustSpots       = [];
+      slider.disabled = false;
+      setTransferPhase('idle');
+
+      createParticles();
+    }
+
+    /* ════════════════════════════════════
+       PARTICLES
+    ════════════════════════════════════ */
+    function clamp(p) {
+      p.x = Math.max(G.gx0 + R, Math.min(G.gx1 - R, p.x));
+      p.y = Math.max(G.gy0 + R, Math.min(G.gy1 - R, p.y));
+    }
+
+    function makeParticle(i) {
+      const spd = (3.0 + Math.random() * 3.6) * SPEED_FACTOR;
+      const ang = Math.random() * Math.PI * 2;
+      return {
+        x:   G.gx0 + R + Math.random() * (G.gx1 - G.gx0 - 2 * R),
+        y:   G.gy0 + R + Math.random() * (G.gy1 - G.gy0 - 2 * R),
+        vx:  Math.cos(ang) * spd,
+        vy:  Math.sin(ang) * spd,
+        isO2: i < nO2,
+        loc: 'S1',        // 'S1' | 'S2' — aktuelle Spritze
+        phase: 'normal',  // 'normal' | 'fadeOut' | 'fadeIn'
+        fadeScale: 1,
+        fadeAlpha: 1,
+      };
+    }
+
+    function createParticles() {
+      particles = Array.from({ length: N }, (_, i) => makeParticle(i));
+    }
+
+    function updateNO2(n) {
+      nO2 = n;
+      for (let i = 0; i < particles.length; i++) particles[i].isO2 = i < nO2;
+      labelEl.textContent = (nO2 * 5) + ' % O₂';
+    }
+
+    /* ════════════════════════════════════
+       PHYSICS – elastic billiard collisions
+    ════════════════════════════════════ */
+    function stepGroup(list, gx0, gx1, gy0, gy1) {
+      const n = list.length;
+      for (let i = 0; i < n; i++) {
+        const p = list[i];
+        p.x += p.vx;  p.y += p.vy;
+
+        if (p.x - R < gx0) { p.x = gx0 + R; p.vx =  Math.abs(p.vx); }
+        if (p.x + R > gx1) { p.x = gx1 - R; p.vx = -Math.abs(p.vx); }
+        if (p.y - R < gy0) { p.y = gy0 + R; p.vy =  Math.abs(p.vy); }
+        if (p.y + R > gy1) { p.y = gy1 - R; p.vy = -Math.abs(p.vy); }
+
+        for (let j = i + 1; j < n; j++) {
+          const q  = list[j];
+          const dx = q.x - p.x,  dy = q.y - p.y;
+          const d2 = dx * dx + dy * dy;
+          const md = 2 * R;
+          if (d2 < md * md && d2 > 1e-6) {
+            const d  = Math.sqrt(d2);
+            const nx = dx / d,  ny = dy / d;
+            const ov = (md - d) * 0.5;
+            p.x -= nx * ov;  p.y -= ny * ov;
+            q.x += nx * ov;  q.y += ny * ov;
+            const dv = (p.vx - q.vx) * nx + (p.vy - q.vy) * ny;
+            if (dv > 0) {
+              p.vx -= dv * nx;  p.vy -= dv * ny;
+              q.vx += dv * nx;  q.vy += dv * ny;
+            }
+          }
+        }
+        /* re-clamp p — collision push may have undone the wall-bounce */
+        if (p.x - R < gx0) p.x = gx0 + R;
+        if (p.x + R > gx1) p.x = gx1 - R;
+        if (p.y - R < gy0) p.y = gy0 + R;
+        if (p.y + R > gy1) p.y = gy1 - R;
+      }
+    }
+
+    function step() {
+      stepGroup(
+        particles.filter(p => p.loc === 'S1' && p.phase === 'normal'),
+        G.gx0, G.gx1, G.gy0, G.gy1
+      );
+
+      /* Spritze 2: Gasarena reicht nur bis zur Teebeutel-Vorderkante —
+         dahinter ist kein Platz für Teilchen (Beutel blockiert). */
+      const list2 = particles.filter(p => p.loc === 'S2' && p.phase === 'normal');
+      if (list2.length) {
+        const gx1_2 = Math.min(G2.teabag.x0, G2.bx1 - 1);
+        if (gx1_2 - G2.gx0 > 2) {
+          stepGroup(list2, G2.gx0, gx1_2, G2.gy0, G2.gy1);
+        }
+      }
+    }
+
+    /* ════════════════════════════════════
+       DRAW – SYRINGE BACKGROUND
+       (drawn BEFORE particles so particles
+        appear to float inside the barrel)
+    ════════════════════════════════════ */
+    function drawSyringeBack(geo = G) {
+      const { cy, bx0, bx1, bw, bih, bwall, by0, by1, oy0, oy1,
+              nozzleW, luerW, nozzleNarrow, stopfenW, earW, px } = geo;
+      const nozzleX1 = bx1 + nozzleW;    // start of Luer Lock
+      const luerX1   = nozzleX1 + luerW; // very tip
+
+      /* ── barrel fill (outer shell) ── */
+      ctx.save();
+      ctx.fillStyle = '#e8e8e8';
+      ctx.beginPath();
+      ctx.moveTo(bx0, oy0);
+      ctx.lineTo(bx1, oy0);
+      ctx.lineTo(nozzleX1, cy - nozzleNarrow);   // taper top
+      ctx.lineTo(nozzleX1, cy + nozzleNarrow);   // taper bottom
+      ctx.lineTo(bx1, oy1);
+      ctx.lineTo(bx0, oy1);
+      ctx.closePath();
+      ctx.fill();
+
+      /* gas zone fill (white) — ab Stopfen-Linksseite, damit Trapez-Ecken weiß bleiben */
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(px - stopfenW, by0, bx1 - (px - stopfenW), bih);
+
+      /* open gas channel: through nozzle taper and Luer Lock bore */
+      const ch = nozzleNarrow;   // channel half-height = nozzle opening
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.moveTo(bx1,      by0);
+      ctx.lineTo(nozzleX1, cy - ch);
+      ctx.lineTo(nozzleX1, cy + ch);
+      ctx.lineTo(bx1,      by1);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillRect(nozzleX1, cy - ch, luerW, ch * 2);
+
+      /* empty zone fill (hinter Stopfen, grau) */
+      ctx.fillStyle = '#d8d8d8';
+      ctx.fillRect(bx0, by0, (px - stopfenW) - bx0, bih);
+      ctx.restore();
+    }
+
+    /* ════════════════════════════════════
+       DRAW – SYRINGE FOREGROUND
+       (drawn AFTER particles)
+    ════════════════════════════════════ */
+    function drawSyringeFore(geo = G) {
+      const { cy, bx0, bx1, bw, bih, bwall, by0, by1, oy0, oy1,
+              nozzleW, luerW,
+              earW, flangeW, rodX0, rodH,
+              nozzleNarrow, stopfenW,
+              px } = geo;
+      const LW     = Math.max(1.5, bih * 0.034);
+      const lwThin = Math.max(0.8, bih * 0.016);
+      const nozzleX1 = bx1 + nozzleW;
+      const luerX1   = nozzleX1 + luerW;
+
+      /* ── scale marks (inside barrel, on bottom wall) ── */
+      const mlPx  = bw / 60;
+      const mkBot = by1;
+      ctx.save();
+      ctx.strokeStyle  = '#444444';
+      ctx.lineWidth    = lwThin;
+      ctx.font         = `300 ${Math.max(6, Math.round(bih * 0.11))}px Arial, sans-serif`;
+      ctx.fillStyle    = '#444444';
+      ctx.textAlign    = 'center';
+      ctx.textBaseline = 'middle';
+      /* marks count from nozzle (0 mL) leftward toward barrel entrance (60 mL) */
+      for (let ml = 5; ml <= 60; ml += 5) {
+        const mx = bx1 - ml * mlPx;   // 0 mL at nozzle, 60 mL at barrel entrance
+        if (mx < bx0 - 2) break;       // past left barrel wall
+        if (ml % 10 !== 0 && mx < px) continue; // minor marks only in gas zone
+        const isMajor = ml % 10 === 0;
+        const tickLen = isMajor ? bih * 0.20 : bih * 0.12;
+        const tickTop = mkBot - tickLen;
+        ctx.beginPath();
+        ctx.moveTo(mx, mkBot);
+        ctx.lineTo(mx, tickTop);
+        ctx.stroke();
+
+        if (isMajor) {
+          ctx.save();
+          const label  = ml + ' mL';
+          const textW  = ctx.measureText(label).width;
+          const gap    = Math.max(2, bih * 0.025);
+          const labelY = tickTop - textW / 2 - gap;
+          ctx.translate(mx, labelY);
+          ctx.rotate(-Math.PI / 2);
+          ctx.fillText(label, 0, 0);
+          ctx.restore();
+        }
+      }
+      ctx.restore();
+
+      /* ── Kolbenstopfen (Trapez: volle Höhe links → Kanalbreite rechts) ── */
+      {
+        const bodyX1 = px - stopfenW;  // linke Kante des Stopfens
+
+        ctx.save();
+        ctx.fillStyle   = '#141414';
+        ctx.strokeStyle = '#000000';
+        ctx.lineWidth   = LW;
+        ctx.beginPath();
+        ctx.moveTo(bodyX1, by0);                // oben-links (volle Höhe)
+        ctx.lineTo(px,     cy - nozzleNarrow);  // oben-rechts (= Kanalöffnung)
+        ctx.lineTo(px,     cy + nozzleNarrow);  // unten-rechts
+        ctx.lineTo(bodyX1, by1);                // unten-links (volle Höhe)
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      /* ── barrel outline (drawn over scale marks + piston) ── */
+      ctx.save();
+      ctx.strokeStyle = '#000000';
+      ctx.lineWidth   = LW;
+      ctx.fillStyle   = 'none';
+
+      /* barrel + nozzle taper as ONE connected path — avoids stray right edge */
+      ctx.beginPath();
+      ctx.moveTo(bx0, oy0);
+      ctx.lineTo(bx1, oy0);
+      ctx.lineTo(nozzleX1, cy - nozzleNarrow);   // nozzle top taper
+      ctx.moveTo(nozzleX1, cy + nozzleNarrow);   // nozzle bottom taper (gap = Luer)
+      ctx.lineTo(bx1, oy1);
+      ctx.lineTo(bx0, oy1);
+      ctx.lineTo(bx0, oy0);
+      ctx.stroke();
+
+      /* inner barrel walls */
+      ctx.beginPath();
+      ctx.moveTo(bx0, by0); ctx.lineTo(bx1, by0);  // inner top
+      ctx.moveTo(bx0, by1); ctx.lineTo(bx1, by1);  // inner bottom
+      ctx.stroke();
+
+
+      /* Luer Lock connector — open bore in centre */
+      const luerH   = bih * 0.42;
+      const channelR = nozzleNarrow;   // bore half-height = nozzle opening
+
+      /* gray walls (top + bottom only, bore stays open/white) */
+      ctx.fillStyle = '#e0e0e0';
+      ctx.fillRect(nozzleX1, cy - luerH / 2,  luerW, luerH / 2 - channelR);
+      ctx.fillRect(nozzleX1, cy + channelR,    luerW, luerH / 2 - channelR);
+
+      /* outline: top outer, bottom outer, left and right face with bore gap */
+      ctx.lineWidth = LW;
+      ctx.beginPath();
+      ctx.moveTo(nozzleX1, cy - luerH / 2); ctx.lineTo(luerX1, cy - luerH / 2);  // top
+      ctx.moveTo(nozzleX1, cy + luerH / 2); ctx.lineTo(luerX1, cy + luerH / 2);  // bottom
+      ctx.moveTo(nozzleX1, cy - luerH / 2); ctx.lineTo(nozzleX1, cy - channelR); // left top
+      ctx.moveTo(nozzleX1, cy + channelR);  ctx.lineTo(nozzleX1, cy + luerH / 2);// left bottom
+      ctx.moveTo(luerX1,   cy - luerH / 2); ctx.lineTo(luerX1,   cy - channelR); // right top
+      ctx.moveTo(luerX1,   cy + channelR);  ctx.lineTo(luerX1,   cy + luerH / 2);// right bottom
+      ctx.stroke();
+
+      /* thread lines only on gray wall sections */
+      ctx.lineWidth = Math.max(1, bih * 0.020);
+      const threadCount = 4;
+      for (let t = 1; t <= threadCount; t++) {
+        const tx  = nozzleX1 + (t / (threadCount + 1)) * luerW;
+        const tx2 = Math.min(tx + luerW * 0.18, luerX1);
+        ctx.beginPath();
+        ctx.moveTo(tx,  cy - luerH / 2); ctx.lineTo(tx2, cy - channelR);  // top wall
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(tx,  cy + channelR);  ctx.lineTo(tx2, cy + luerH / 2); // bottom wall
+        ctx.stroke();
+      }
+      ctx.restore();
+
+      /* ── barrel entrance ears (left side, finger rests) ── */
+      ctx.save();
+      const earH    = (oy1 - oy0) * 1.0; // same height as outer barrel
+      const earProj = earW * 1.4;         // how far ears project outward
+      ctx.fillStyle   = '#c8c8c8';
+      ctx.strokeStyle = '#000000';
+      ctx.lineWidth   = LW;
+      /* top ear */
+      ctx.beginPath();
+      ctx.rect(bx0 - earW, oy0 - earProj / 2, earW, earProj * 0.5 + bwall);
+      ctx.fill(); ctx.stroke();
+      /* bottom ear */
+      ctx.beginPath();
+      ctx.rect(bx0 - earW, by1, earW, earProj * 0.5 + bwall);
+      ctx.fill(); ctx.stroke();
+      ctx.restore();
+
+      /* ── plunger rod: T-flange → through empty zone → piston face ── */
+      ctx.save();
+      /* rod ends at left face of rubber cap (px-stopfenW), not at gas boundary (px) */
+      const rodFull = (px - stopfenW) - (rodX0 + flangeW);
+      ctx.fillStyle   = '#aaaaaa';
+      ctx.strokeStyle = '#000000';
+      ctx.lineWidth   = LW;
+      ctx.fillRect(rodX0 + flangeW,  cy - rodH / 2, rodFull, rodH);
+      ctx.strokeRect(rodX0 + flangeW, cy - rodH / 2, rodFull, rodH);
+      /* darker centre stripe (SVG style) */
+      ctx.fillStyle = '#888888';
+      ctx.fillRect(rodX0 + flangeW, cy - rodH * 0.07, rodFull, rodH * 0.14);
+      ctx.restore();
+
+      /* ── T-flange (left end of plunger, reference SVG style) ── */
+      ctx.save();
+      ctx.fillStyle   = '#aaaaaa';
+      ctx.strokeStyle = '#000000';
+      ctx.lineWidth   = LW;
+      const fx  = rodX0;
+      const fW  = flangeW;
+      const fOH = oy1 - oy0; // full outer barrel height
+      /* full-height rectangle = T-wings + rod height */
+      ctx.fillRect(fx, cy - fOH / 2, fW, fOH);
+      ctx.strokeRect(fx, cy - fOH / 2, fW, fOH);
+      /* cut out rod slot (leave wings top + bottom, rod in middle) */
+      ctx.fillStyle   = '#c0c0c0';
+      /* top wing shade */
+      ctx.fillRect(fx, cy - fOH / 2, fW, (fOH - rodH) / 2);
+      /* bottom wing shade */
+      ctx.fillRect(fx, cy + rodH / 2, fW, (fOH - rodH) / 2);
+      /* outline wing dividers */
+      ctx.strokeStyle = '#000000';
+      ctx.lineWidth   = lwThin;
+      ctx.beginPath();
+      ctx.moveTo(fx, cy - rodH / 2); ctx.lineTo(fx + fW, cy - rodH / 2);
+      ctx.moveTo(fx, cy + rodH / 2); ctx.lineTo(fx + fW, cy + rodH / 2);
+      ctx.stroke();
+      ctx.restore();
+
+      /* ── glass sheen overlay (semi-transparent, top of barrel) ── */
+      ctx.save();
+      const sheenGrad = ctx.createLinearGradient(0, oy0, 0, by0 + bih * 0.38);
+      sheenGrad.addColorStop(0,   'rgba(255,255,255,0.40)');
+      sheenGrad.addColorStop(1,   'rgba(255,255,255,0.00)');
+      ctx.fillStyle = sheenGrad;
+      /* only over the outer barrel shell (not ears/rod) */
+      ctx.fillRect(bx0, oy0, bx1 - bx0, (oy1 - oy0) * 0.45);
+      ctx.restore();
+    }
+
+    /* ════════════════════════════════════
+       DRAW – THREE-WAY VALVE (Dreiwegehahn)
+    ════════════════════════════════════ */
+    function drawValve() {
+      const { vx0, vx1, bCx, cy: vCy, bih,
+              valveS: S, valveR: r, valveStub: stubLen } = G;
+      const LW = Math.max(1.5, bih * 0.034);
+
+      /* proportions derived from 3_Wege_Hahn.svg; S = 0.5 → 50 % der Original-Größe (siehe G) */
+      const connH    = bih * 0.36 * S;              // Anschluss-Höhe (am Kreis, schmal)
+      const mouthH   = bih * 0.52 * S;              // Anschluss-Höhe (Öffnung, breit)
+
+      ctx.save();
+
+      /* ── Linke weibliche Buchse (weiß, Trichterform enger am Kreis) ── */
+      ctx.fillStyle   = 'rgba(232,232,232,0.92)';
+      ctx.strokeStyle = '#555555';
+      ctx.lineWidth   = LW;
+      ctx.beginPath();
+      ctx.moveTo(vx0,     vCy - mouthH / 2);
+      ctx.lineTo(bCx - r, vCy - connH  / 2);
+      ctx.lineTo(bCx - r, vCy + connH  / 2);
+      ctx.lineTo(vx0,     vCy + mouthH / 2);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      /* ── Rechter männlicher Stecker (grün, breit nach rechts) ── */
+      const rightH = mouthH * 0.95;
+      ctx.fillStyle   = '#80FFCC';
+      ctx.strokeStyle = '#00B86E';
+      ctx.lineWidth   = LW;
+      ctx.beginPath();
+      ctx.moveTo(bCx + r, vCy - connH  / 2);
+      ctx.lineTo(vx1,     vCy - rightH / 2);
+      ctx.lineTo(vx1,     vCy + rightH / 2);
+      ctx.lineTo(bCx + r, vCy + connH  / 2);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      /* Gewinderippen auf grünem Stecker */
+      const nT  = 3;
+      const gL  = vx1 - (bCx + r);
+      const dX  = gL * 0.12;
+      ctx.strokeStyle = '#00B86E';
+      ctx.lineWidth   = Math.max(0.8, LW * 0.55);
+      for (let t = 1; t <= nT; t++) {
+        const tx = (bCx + r) + gL * t / (nT + 1);
+        ctx.beginPath();
+        ctx.moveTo(tx,      vCy - rightH / 2);
+        ctx.lineTo(tx + dX, vCy - connH  / 2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(tx,      vCy + rightH / 2);
+        ctx.lineTo(tx + dX, vCy + connH  / 2);
+        ctx.stroke();
+      }
+
+      /* ── Untere weibliche Buchse (weiß, Trichterform enger am Kreis) ── */
+      ctx.fillStyle   = 'rgba(232,232,232,0.92)';
+      ctx.strokeStyle = '#555555';
+      ctx.lineWidth   = LW;
+      ctx.beginPath();
+      ctx.moveTo(bCx - connH  / 2, vCy + r);
+      ctx.lineTo(bCx + connH  / 2, vCy + r);
+      ctx.lineTo(bCx + mouthH / 2, vCy + r + stubLen);
+      ctx.lineTo(bCx - mouthH / 2, vCy + r + stubLen);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      /* ── Kreisgehäuse (weißlich, radial gradient) ── */
+      const cGrad = ctx.createRadialGradient(
+        bCx - r * 0.28, vCy - r * 0.28, r * 0.05,
+        bCx, vCy, r
+      );
+      cGrad.addColorStop(0,   '#f8f8f8');
+      cGrad.addColorStop(0.6, '#e4e4e4');
+      cGrad.addColorStop(1,   '#c0c0c0');
+      ctx.fillStyle   = cGrad;
+      ctx.strokeStyle = '#444444';
+      ctx.lineWidth   = LW;
+      ctx.beginPath();
+      ctx.arc(bCx, vCy, r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      /* ── Blauer T-Hahn (drehbar; Phase 1: 90° im Uhrzeigersinn = Stutzen zeigt rechts) ──
+         Im SVG: Arme nach links, rechts und unten.
+         90° CW-Rotation: Arm der vorher nach unten zeigte → zeigt jetzt nach rechts.
+         → unterer Anschluss (Spritze 2) optisch nicht verbunden.            */
+      const tBarW  = bih * 1.80 * S;   // Länge des Querbalkens
+      const tBarH  = bih * 0.32 * S;   // Dicke des Querbalkens
+      const tStemW = bih * 0.22 * S;   // Breite des Stiels
+      const tStemL = bih * 0.58 * S;   // Länge des Stiels
+
+      ctx.save();
+      ctx.translate(bCx, vCy);
+      ctx.rotate(Math.PI / 2);   // Phase 1: 90° CW
+
+      ctx.fillStyle   = '#0000FF';
+      ctx.strokeStyle = '#002060';
+      ctx.lineWidth   = Math.max(1, LW * 0.65);
+
+      /* Querbalken (pillenförmig) */
+      const hh = tBarH / 2;
+      const hw = tBarW / 2 - hh;
+      ctx.beginPath();
+      ctx.arc(-hw, 0, hh, Math.PI / 2, 3 * Math.PI / 2);
+      ctx.lineTo(hw, -hh);
+      ctx.arc(hw, 0, hh, -Math.PI / 2, Math.PI / 2);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      /* Stiel (nach unten im lokalen Frame) */
+      const sw = tStemW / 2;
+      ctx.beginPath();
+      ctx.rect(-sw, hh, tStemW, tStemL - sw);
+      ctx.fill();
+      ctx.stroke();
+      /* runde Stiel-Spitze */
+      ctx.beginPath();
+      ctx.arc(0, hh + tStemL - sw, sw, 0, Math.PI);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.restore();
+
+      /* ── Dunkler Drehpunkt in der Mitte ── */
+      ctx.fillStyle = '#002060';
+      ctx.beginPath();
+      ctx.arc(bCx, vCy, r * 0.28, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    /* ════════════════════════════════════
+       DRAW – SPRITZE 2 (senkrecht, am Hahn)
+       Wiederverwendung der Spritze-1-Zeichenroutinen mit
+       G2 (lokal aufgebaut wie Spritze 1, Düse in +x);
+       Drehung um -90° lässt die Düse nach oben zum Hahn
+       zeigen, der Griff hängt nach unten.
+    ════════════════════════════════════ */
+    function drawSyringe2() {
+      const { vBottomX, vBottomY } = G;
+      ctx.save();
+      ctx.translate(vBottomX, vBottomY);
+      ctx.rotate(-Math.PI / 2);
+      drawSyringeBack(G2);
+      drawTeabag2();
+      drawRustSpots();
+      drawParticleList(particles.filter(p => p.loc === 'S2'));
+      drawSyringeFore(G2);
+      ctx.restore();
+    }
+
+    /* Päckchen mit Heaterpack-Material (Eisenpulver + Aktivkohle):
+       liegt als kleiner "Teebeutel" oben in Spritze 2 und füllt deren
+       anfängliche 8-mL-Gaszone vollständig aus. Farbgebung: ganz
+       dünnes Beutelpapier (helles, halbtransparentes Cremeweiß) über
+       einem dunklen Kern (Eisen/Kohle-Granulat) — das Schwarz schimmert
+       gedämpft durch das Papier hindurch. Wird in Spritze 2's lokalem,
+       gedrehtem Koordinatensystem gezeichnet (zwischen Back und Fore,
+       also "innerhalb" des Glaszylinders, unter dessen Konturlinien). */
+    function drawTeabag2() {
+      /* feste, in computeGeometry2() ein für alle Mal berechnete Form —
+         hier nur noch lesen, NICHT aus px/bx1/... neu ableiten, damit
+         das Päckchen unverrückbar an seinem Platz bleibt (auch wenn
+         künftige Animationen den Kolben/px dynamisch bewegen). */
+      const { x0, y0, w, h, r } = G2.teabag;
+      const { bih } = G2;
+
+      ctx.save();
+      /* dunkler Kern: Eisenpulver/Aktivkohle-Granulat */
+      ctx.fillStyle = '#262422';
+      ctx.beginPath();
+      ctx.roundRect(x0, y0, w, h, r);
+      ctx.fill();
+
+      /* dünnes Beutelpapier darüber — halbtransparent, dämpft das
+         Schwarz zu einem leichten Durchschimmern */
+      ctx.fillStyle = 'rgba(248, 242, 226, 0.5)';
+      ctx.beginPath();
+      ctx.roundRect(x0, y0, w, h, r);
+      ctx.fill();
+
+      /* gestrichelte Naht/Kontur des Beutels */
+      ctx.strokeStyle = 'rgba(124, 112, 92, 0.55)';
+      ctx.lineWidth   = Math.max(0.6, bih * 0.012);
+      ctx.setLineDash([Math.max(2, bih * 0.05), Math.max(1.5, bih * 0.035)]);
+      ctx.beginPath();
+      ctx.roundRect(x0, y0, w, h, r);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    /* ════════════════════════════════════
+       DRAW – PARTICLES
+    ════════════════════════════════════ */
+    function drawParticleList(list) {
+      for (const p of list) {
+        const scale = p.fadeScale;
+        const alpha = p.fadeAlpha;
+        if (scale <= 0 || alpha <= 0) continue;
+        const r = R * scale;
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        if (p.isO2) {
+          const g = ctx.createRadialGradient(
+            p.x - r * 0.30, p.y - r * 0.32, r * 0.08,
+            p.x,             p.y,             r
+          );
+          g.addColorStop(0,   '#cfe3ff');
+          g.addColorStop(0.5, '#2f6fd6');
+          g.addColorStop(1,   '#0d3a73');
+          ctx.fillStyle   = g;
+          ctx.strokeStyle = '#06264a';
+          ctx.lineWidth   = Math.max(1, r * 0.17);
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+        } else {
+          /* round billiard-ball (gray, 3D gradient) */
+          const g2 = ctx.createRadialGradient(
+            p.x - r * 0.30, p.y - r * 0.32, r * 0.08,
+            p.x,             p.y,             r
+          );
+          g2.addColorStop(0,   '#f0f0f0');
+          g2.addColorStop(0.4, '#b0b0b0');
+          g2.addColorStop(1,   '#606060');
+          ctx.fillStyle   = g2;
+          ctx.strokeStyle = '#555555';
+          ctx.lineWidth   = Math.max(1, r * 0.17);
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
+    }
+
+    /* ════════════════════════════════════
+       TRANSFER-ANIMATION (Phase 1: Spritze 1 → Spritze 2)
+       Stempel fahren synchron; alle 20 Teilchen wechseln nacheinander
+       (alle TRIGGER_INTERVAL ms eines) mit Aus-/Einblend-Effekt die Spritze.
+    ════════════════════════════════════ */
+    function startTransferToS2() {
+      transferAnim = {
+        startTime: null,
+        duration:  TRANSFER_DURATION,
+        fromVol1: 50, toVol1: 0,    // Spritze 1 läuft komplett leer
+        fromVol2:  8, toVol2: 58,   // Spritze 2 nimmt das gesamte Volumen auf
+        triggered: 0,
+        total: PARTICLES_TO_MOVE,
+        dir: 'toS2',
+      };
+    }
+
+    function updateTransferAnimation(now) {
+      if (!transferAnim) return;
+      const a = transferAnim;
+      if (a.startTime === null) a.startTime = now;
+      const elapsed = now - a.startTime;
+      const t = Math.min(1, elapsed / a.duration);
+
+      setPistonVol1(a.fromVol1 + (a.toVol1 - a.fromVol1) * t);
+      setPistonVol2(a.fromVol2 + (a.toVol2 - a.fromVol2) * t);
+
+      /* alle TRIGGER_INTERVAL ms wechselt ein weiteres Teilchen die Spritze
+         (entspricht ML_PER_PARTICLE mL übertragenem Volumen) — gleicher
+         Takt in beide Richtungen */
+      const due = Math.min(a.total, Math.floor(elapsed / TRIGGER_INTERVAL) + 1);
+      while (a.triggered < due) {
+        if (a.dir === 'toS2') triggerParticleTransferToS2(now);
+        else                  triggerParticleTransferToS1(now);
+        a.triggered++;
+      }
+
+      if (t >= 1) {
+        transferAnim = null;
+        if (a.dir === 'toS2') {
+          setTransferPhase('doneToS2');
+          startO2Reaction();   // automatischer Start der Reaktionsphase
+        } else {
+          setTransferPhase('doneToS1');
+        }
+      }
+    }
+
+    /* wählt zufällig eines der noch in Spritze 1 befindlichen Teilchen aus
+       und startet dessen Ausblenden am Luer-Lock (Düsenöffnung) */
+    function triggerParticleTransferToS2(now) {
+      const candidates = particles.filter(p => p.loc === 'S1' && p.phase === 'normal');
+      if (!candidates.length) return;
+      const p = candidates[Math.floor(Math.random() * candidates.length)];
+      p.phase       = 'fadeOut';
+      p.phaseStart  = now;
+      p.fadeFromX   = p.x;
+      p.fadeFromY   = p.y;
+      p.fadeToX     = G.gx1;   // Drift zur Düsenöffnung von Spritze 1
+      p.fadeToY     = G.cy;
+      p.fadeDestLoc = 'S2';
+    }
+
+    /* Position zum Einblenden in Spritze 2: irgendwo zwischen Kolben und
+       Teebeutel-Vorderkante — also unterhalb (= unmittelbar vor) des Beutels.
+       Ist der Bereich noch enger als ein Teilchen, wird mittig platziert
+       (leichtes Überlappen mit dem Beutel ist in Ordnung). */
+    function pickFadeInPos2() {
+      const x1 = G2.teabag.x0;
+      const x0 = G2.gx0;
+      const lo = x0 + R, hi = x1 - R;
+      const x  = (hi > lo) ? (lo + Math.random() * (hi - lo)) : (x0 + x1) / 2;
+      const y  = G2.gy0 + R + Math.random() * (G2.gy1 - G2.gy0 - 2 * R);
+      return { x, y };
+    }
+
+    /* ════════════════════════════════════
+       RÜCKTRANSFER-ANIMATION (Phase 2: Spritze 2 → Spritze 1)
+       Spiegelbildlich zu Phase 1: alle noch in Spritze 2 befindlichen
+       Teilchen — egal ob unreagierter Sauerstoff oder "normales" Gas —
+       wechseln im selben Takt (TRIGGER_INTERVAL) mit Aus-/Einblend-Effekt
+       zurück nach Spritze 1; die Stempel fahren synchron in Gegenrichtung.
+       Wird der Schalter zu früh gedrückt, wandert einfach zurück, was
+       gerade noch da ist — eine laufende Reaktionsphase wird dafür
+       gestoppt (kein Teilchen reagiert mehr während des Rücktransfers).
+    ════════════════════════════════════ */
+    function startTransferToS1() {
+      reactionAnim = null;   // laufende Reaktion abbrechen — Rest wandert zurück
+
+      const remaining = particles.filter(p => p.loc === 'S2' && p.phase === 'normal').length;
+      const fromVol2  = (G2.bx1 - G2.px) / (G2.bw / 60);   // aktuelles Volumen Spritze 2
+      const fromVol1  = 0;                                  // Spritze 1 ist seit Phase 1 leer
+
+      if (remaining === 0) {
+        setTransferPhase('doneToS1');   // nichts mehr zu übertragen
+        return;
+      }
+
+      transferAnim = {
+        startTime: null,
+        duration:  remaining * TRIGGER_INTERVAL,   // gleicher Takt wie Phase 1
+        fromVol1, toVol1: fromVol1 + remaining * ML_PER_PARTICLE,
+        fromVol2, toVol2: fromVol2 - remaining * ML_PER_PARTICLE,
+        triggered: 0,
+        total: remaining,
+        dir: 'toS1',
+      };
+    }
+
+    /* wählt zufällig eines der noch in Spritze 2 befindlichen Teilchen aus
+       und startet dessen Ausblenden am Luer-Lock von Spritze 2 (lokale
+       Koordinaten) — spiegelbildlich zu triggerParticleTransferToS2 */
+    function triggerParticleTransferToS1(now) {
+      const candidates = particles.filter(p => p.loc === 'S2' && p.phase === 'normal');
+      if (!candidates.length) return;
+      const p = candidates[Math.floor(Math.random() * candidates.length)];
+      p.phase       = 'fadeOut';
+      p.phaseStart  = now;
+      p.fadeFromX   = p.x;
+      p.fadeFromY   = p.y;
+      p.fadeToX     = G2.gx1;   // Drift zur Düsenöffnung von Spritze 2
+      p.fadeToY     = G2.cy;
+      p.fadeDestLoc = 'S1';
+    }
+
+    /* Position zum Einblenden in Spritze 1: irgendwo im (wachsenden)
+       Gasraum zwischen Kolben und Düse — analog zur ursprünglichen
+       Teilchen-Platzierung in makeParticle(). */
+    function pickFadeInPos1() {
+      const x = G.gx0 + R + Math.random() * (G.gx1 - G.gx0 - 2 * R);
+      const y = G.gy0 + R + Math.random() * (G.gy1 - G.gy0 - 2 * R);
+      return { x, y };
+    }
+
+    /* steuert Aus-/Einblenden aller gerade wechselnden Teilchen */
+    function updateTransferFades(now) {
+      for (const p of particles) {
+        if (p.phase === 'fadeOut') {
+          const t = Math.min(1, (now - p.phaseStart) / FADE_OUT_MS);
+          p.fadeScale = 1 - t;
+          p.fadeAlpha = 1 - t;
+          p.x = p.fadeFromX + (p.fadeToX - p.fadeFromX) * t;
+          p.y = p.fadeFromY + (p.fadeToY - p.fadeFromY) * t;
+          if (t >= 1) {
+            const pos = (p.fadeDestLoc === 'S2') ? pickFadeInPos2() : pickFadeInPos1();
+            p.loc        = p.fadeDestLoc;
+            p.phase      = 'fadeIn';
+            p.phaseStart = now;
+            p.x = pos.x;  p.y = pos.y;
+            const spd = (3.0 + Math.random() * 3.6) * SPEED_FACTOR;
+            const ang = Math.random() * Math.PI * 2;
+            p.vx = Math.cos(ang) * spd;
+            p.vy = Math.sin(ang) * spd;
+          }
+        } else if (p.phase === 'fadeIn') {
+          const t = Math.min(1, (now - p.phaseStart) / FADE_IN_MS);
+          p.fadeScale = t;
+          p.fadeAlpha = t;
+          if (t >= 1) {
+            p.phase     = 'normal';
+            p.fadeScale = 1;
+            p.fadeAlpha = 1;
+          }
+        }
+      }
+    }
+
+    /* ════════════════════════════════════
+       REAKTIONSPHASE (automatisch nach Phase 1)
+       O₂-Teilchen reagieren nacheinander mit dem Eisenpulver: verschwinden
+       im Takt von O2_REACTION_INTERVAL, Kolben rückt synchron weich vor,
+       je ein rostbrauner Fleck markiert die Reaktionsstelle auf dem Beutel.
+    ════════════════════════════════════ */
+    function startO2Reaction() {
+      if (nO2 <= 0) return;   // nichts zu verbrauchen
+      reactionAnim = {
+        startTime: null,
+        totalO2:   nO2,
+        fromVol2:  SYRINGE2_FULL_VOL,
+        triggered: 0,
+      };
+    }
+
+    function updateO2Reaction(now) {
+      if (!reactionAnim) return;
+      const a = reactionAnim;
+      if (a.startTime === null) a.startTime = now;
+      const elapsed  = now - a.startTime;
+      const duration = a.totalO2 * O2_REACTION_INTERVAL;
+      const t = Math.min(1, elapsed / duration);
+
+      /* kontinuierlicher, weicher Kolbenrückzug: nach jedem vollen
+         Intervall sind exakt ML_PER_O2_REACTION mL zurückgelegt —
+         deckt sich exakt mit den diskreten Verschwinde-Zeitpunkten */
+      setPistonVol2(a.fromVol2 - a.totalO2 * ML_PER_O2_REACTION * t);
+
+      const due = Math.min(a.totalO2, Math.floor(elapsed / O2_REACTION_INTERVAL) + 1);
+      while (a.triggered < due) {
+        if (!triggerO2Consumption(now)) break;   // noch kein Kandidat bereit — nächster Frame
+        a.triggered++;
+      }
+
+      if (t >= 1) reactionAnim = null;
+    }
+
+    /* wählt zufällig ein noch vorhandenes O2-Teilchen in Spritze 2 aus,
+       lässt es einfach ausblenden (wie besprochen: der genaue Kontakt-
+       moment mit dem Teebeutel ist ohnehin kaum erkennbar) und setzt
+       einen Rostfleck. Gibt false zurück, falls aktuell kein Kandidat
+       bereitsteht (z. B. weil das letzte Teilchen noch herüberwechselt). */
+    function triggerO2Consumption(now) {
+      const candidates = particles.filter(p => p.loc === 'S2' && p.phase === 'normal' && p.isO2);
+      if (!candidates.length) return false;
+      const p = candidates[Math.floor(Math.random() * candidates.length)];
+      p.phase      = 'vanish';
+      p.phaseStart = now;
+      addRustSpot();
+      return true;
+    }
+
+    /* einfaches Ausblenden an Ort und Stelle (Skalierung + Transparenz 1→0);
+       danach dauerhaft aus der Simulation entfernt ('gone' = nicht mehr
+       gezeichnet, nicht mehr in der Physik) */
+    function updateVanishing(now) {
+      for (const p of particles) {
+        if (p.phase !== 'vanish') continue;
+        const t = Math.min(1, (now - p.phaseStart) / FADE_OUT_MS);
+        p.fadeScale = 1 - t;
+        p.fadeAlpha = 1 - t;
+        if (t >= 1) {
+          p.phase     = 'gone';
+          p.fadeScale = 0;
+          p.fadeAlpha = 0;
+        }
+      }
+    }
+
+    /* neuer Rostfleck an zufälliger Stelle auf der sichtbaren
+       Teebeutel-Oberfläche (G2-Lokalkoordinaten); bleibt dauerhaft
+       bestehen — überlappende Flecken "wachsen" beim Zeichnen optisch
+       zusammen (mehrfaches Füllen derselben halbtransparenten Farbe). */
+    function addRustSpot() {
+      const { x0, y0, w, h } = G2.teabag;
+      const baseR = Math.min(w, h) * 0.09;
+      const r = baseR * (0.7 + Math.random() * 0.6);
+      const x = x0 + r + Math.random() * Math.max(0, w - 2 * r);
+      const y = y0 + r + Math.random() * Math.max(0, h - 2 * r);
+      rustSpots.push({ x, y, r });
+    }
+
+    function drawRustSpots() {
+      if (!rustSpots.length) return;
+      ctx.save();
+      ctx.fillStyle = RUST_COLOR;
+      for (const s of rustSpots) {
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    /* ════════════════════════════════════
+       LEGENDE (im Canvas, unten links im freien Raum)
+       Erklärt die Farben/Symbole der Simulation: Sauerstoff (blaue
+       Kugel), anderes Gas (graue Kugel), Heaterpack-Päckchen
+       ("Handwärmer") und — sobald der erste Fleck entstanden ist —
+       Rost. Position wird aus G abgeleitet (links von der senkrechten
+       Spritze 2 um bCx, unterhalb der waagrechten Spritze 1 um oy1) —
+       bleibt damit bei jeder Canvas-Größe automatisch überlappungsfrei.
+       Die Symbol-Farben sind fachliche Simulationsfarben (Punkt 9,
+       müssen mit drawParticleList/drawTeabag2/RUST_COLOR übereinstimmen
+       und bleiben theme-fest); nur die Beschriftung folgt der
+       LNCU-Palette und wird daher live aus den CSS-Variablen gelesen.
+    ════════════════════════════════════ */
+    const LEGEND_ROWS = 4;   // feste Zeilenzahl (auch bevor "Rost" erscheint) → kein Layoutsprung
+    const LEGEND_SCALE = 0.8;  // verkleinert Icons & Schrift, damit längere Übersetzungen nicht in Spritze 2 hineinreichen
+
+    /* Mini-Kugel mit identischer Farbgebung wie die Gas-Teilchen
+       (siehe drawParticleList — Werte synchron halten!) */
+    function drawLegendSphere(x, y, r, isO2) {
+      const g = ctx.createRadialGradient(x - r * 0.30, y - r * 0.32, r * 0.08, x, y, r);
+      if (isO2) {
+        g.addColorStop(0,   '#cfe3ff');
+        g.addColorStop(0.5, '#2f6fd6');
+        g.addColorStop(1,   '#0d3a73');
+      } else {
+        g.addColorStop(0,   '#f0f0f0');
+        g.addColorStop(0.4, '#b0b0b0');
+        g.addColorStop(1,   '#606060');
+      }
+      ctx.save();
+      ctx.fillStyle   = g;
+      ctx.strokeStyle = isO2 ? '#06264a' : '#555555';
+      ctx.lineWidth   = Math.max(1, r * 0.17);
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    /* Mini-Päckchen mit derselben Farbschichtung wie drawTeabag2
+       (dunkler Granulat-Kern, halbtransparentes Beutelpapier, Naht) —
+       bei Icon-Größe vereinfacht zu einem durchgezogenen Rand */
+    function drawLegendHeaterpack(cx, cy, r) {
+      const w = r * 2.2, h = r * 1.6;
+      const x = cx - w / 2, y = cy - h / 2;
+      const rr = Math.min(w, h) * 0.22;
+      ctx.save();
+      ctx.fillStyle = '#262422';
+      ctx.beginPath(); ctx.roundRect(x, y, w, h, rr); ctx.fill();
+      ctx.fillStyle = 'rgba(248, 242, 226, 0.5)';
+      ctx.beginPath(); ctx.roundRect(x, y, w, h, rr); ctx.fill();
+      ctx.strokeStyle = 'rgba(124, 112, 92, 0.7)';
+      ctx.lineWidth   = Math.max(0.8, r * 0.07);
+      ctx.beginPath(); ctx.roundRect(x, y, w, h, rr); ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawLegend() {
+      const margin = W * 0.025;
+      const x0 = margin;
+      const x1 = G.bCx - (G.bih / 2 + G.bwall) - margin;
+      const y0 = G.oy1 + margin;
+      const y1 = H - margin;
+      if (x1 - x0 < margin || y1 - y0 < margin) return;   // zu wenig Platz (extreme Seitenverhältnisse)
+
+      const entryH = (y1 - y0) / LEGEND_ROWS;
+      const iconR  = Math.min(entryH, x1 - x0) * 0.30 * LEGEND_SCALE;
+      const iconCx = x0 + iconR + entryH * 0.12;
+      const textX  = x0 + iconR * 2 + entryH * 0.45;
+      const rowCy  = i => y0 + entryH * (i + 0.5);
+
+      /* Beschriftungsfarbe live aus der LNCU-Palette lesen — UI-Layer
+         nach Punkt 8/9, reagiert automatisch auf Theme-Wechsel */
+      const labelColor = getComputedStyle(document.documentElement)
+                           .getPropertyValue('--bricks-color-gray-100').trim() || '#333333';
+
+      const tL = TRANSLATIONS[currentLang] || TRANSLATIONS.de;
+
+      ctx.save();
+      ctx.font         = `${Math.max(10, Math.round(entryH * 0.34 * LEGEND_SCALE))}px Arial, sans-serif`;
+      ctx.fillStyle    = labelColor;
+      ctx.textAlign    = 'left';
+      ctx.textBaseline = 'middle';
+
+      drawLegendSphere(iconCx, rowCy(0), iconR, true);
+      ctx.fillText(tL.legendO2, textX, rowCy(0));
+
+      drawLegendSphere(iconCx, rowCy(1), iconR, false);
+      ctx.fillText(tL.legendOther, textX, rowCy(1));
+
+      drawLegendHeaterpack(iconCx, rowCy(2), iconR);
+      ctx.fillText(tL.legendWarmer, textX, rowCy(2));
+
+      if (rustSpots.length > 0) {
+        ctx.save();
+        ctx.fillStyle = RUST_COLOR;
+        ctx.beginPath();
+        ctx.arc(iconCx, rowCy(3), iconR, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+        ctx.fillStyle = labelColor;
+        ctx.fillText(tL.legendRust, textX, rowCy(3));
+      }
+
+      ctx.restore();
+    }
+
+    /* ════════════════════════════════════
+       MAIN LOOP
+    ════════════════════════════════════ */
+    let running = true;
+    document.addEventListener('visibilitychange', () => {
+      running = !document.hidden;
+      if (running) requestAnimationFrame(frame);
+    });
+
+    function frame(now) {
+      updateTransferAnimation(now);
+      updateTransferFades(now);
+      updateO2Reaction(now);
+      updateVanishing(now);
+      step();
+      ctx.clearRect(0, 0, W, H);
+      drawSyringeBack();    // barrel fill (white/gray zones)
+      drawParticleList(particles.filter(p => p.loc === 'S1'));  // particles INSIDE barrel 1
+      drawSyringeFore();    // outlines, piston, rod, flange, nozzle — on top
+      drawValve();          // Dreiwegehahn
+      drawSyringe2();       // Spritze 2 (senkrecht, am unteren Hahn-Anschluss)
+      drawLegend();         // Erklärung der Farben/Symbole, unten links im freien Raum
+      if (running) requestAnimationFrame(frame);
+    }
+
+    /* ════════════════════════════════════
+       EVENTS
+    ════════════════════════════════════ */
+    slider.addEventListener('input', () => updateNO2(+slider.value));
+
+    /* Phasen-Schaltung: setzt Zustand + (de)aktiviert die Schalter passend */
+    function setTransferPhase(next) {
+      transferPhase   = next;
+      btnToS2.disabled = (transferPhase !== 'idle');
+      btnToS1.disabled = (transferPhase !== 'doneToS2');
+    }
+
+    btnToS2.addEventListener('click', () => {
+      if (transferPhase !== 'idle') return;
+      setTransferPhase('toS2');
+      slider.disabled = true;     // O2-Konzentration ab jetzt fixiert
+      startTransferToS2();        // Stempel- + Teilchen-Animation (4 s)
+    });
+
+    btnToS1.addEventListener('click', () => {
+      if (transferPhase !== 'doneToS2') return;
+      setTransferPhase('toS1');
+      startTransferToS1();   // Stempel- + Teilchen-Animation, Restgas zurück nach Spritze 1
+    });
+
+    const ro = new ResizeObserver(() => resize());
+    ro.observe(canvas.parentElement);
+
+    /* ════════════════════════════════════
+       BOOTSTRAP
+    ════════════════════════════════════ */
+    resize();
+    updateNO2(nO2);
+    frame(performance.now());
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+}());
+</script>
+
+<!-- ═══════════════════════════════════════════════════
+     ENDE Bricks Code Element
+═══════════════════════════════════════════════════ -->
+
+</body>
+</html>
