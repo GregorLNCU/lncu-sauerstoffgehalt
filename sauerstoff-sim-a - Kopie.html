@@ -39,7 +39,7 @@
     flex-direction: column;
     gap: 0.8rem;
   }
-  #lncu-o2sim-canvas {
+  .lncu-o2sim-canvas {
     display: block;
     width: 100%;
     flex: 0 0 auto;
@@ -47,7 +47,7 @@
   /* ── Steuerzeile unter dem Canvas: 2 Pfeil-Icon-Schalter (Phasen-Logik) ── */
   .lncu-o2sim-control-row {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     gap: 1.2rem;
@@ -77,6 +77,9 @@
     opacity: 0.35;
     cursor: not-allowed;
   }
+  .lncu-o2sim-btn-restart {
+    margin-top: 0.8rem;
+  }
   .lncu-o2sim-switch-icon {
     display: block;
     flex-shrink: 0;
@@ -97,6 +100,10 @@
   }
   /* ── Spalte 1: Flaggen-Platzhalter für Sprachumschaltung, alle untereinander ── */
   .lncu-o2sim-flags-col {
+    background-color: var(--bricks-color-white, #ffffff);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -133,6 +140,10 @@
   }
   /* ── Spalte 3: senkrechter Schieberegler – auf das Funktionale reduziert ── */
   .lncu-o2sim-slider-col {
+    background-color: var(--bricks-color-white, #ffffff);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -170,28 +181,9 @@
 <div class="lncu-o2sim-root">
   <!-- Spalte 1 (schmal): Platzhalter für Sprachumschaltung – alle Flaggen untereinander -->
   <div class="lncu-o2sim-flags-col" aria-label="Sprachauswahl">
-    <span id="lncu-o2sim-flags-label" class="lncu-o2sim-flags-label">Sprache</span>
-    <span class="lncu-o2sim-flag-placeholder" data-lang="ur"  title="Pakistan – Urdu">🇵🇰</span>
-    <span class="lncu-o2sim-flag-placeholder" data-lang="ar"  title="Irak – Arabisch">🇮🇶</span>
-    <span class="lncu-o2sim-flag-placeholder" data-lang="tr"  title="Türkei – Türkisch">🇹🇷</span>
-    <span class="lncu-o2sim-flag-placeholder" data-lang="sq"  title="Kosovo – Albanisch">🇽🇰</span>
-    <span class="lncu-o2sim-flag-placeholder" data-lang="sq"  title="Albanien – Albanisch">🇦🇱</span>
-    <span class="lncu-o2sim-flag-placeholder" data-lang="prs" title="Afghanistan – Dari">🇦🇫</span>
-    <span class="lncu-o2sim-flag-placeholder" data-lang="ar"  title="Marokko – Arabisch">🇲🇦</span>
-    <span class="lncu-o2sim-flag-placeholder" data-lang="uk"  title="Ukraine – Ukrainisch">🇺🇦</span>
-    <span class="lncu-o2sim-flag-placeholder" data-lang="en"  title="England – Englisch">🇬🇧</span>
-    <span class="lncu-o2sim-flag-placeholder" data-lang="ru"  title="Russland – Russisch">🇷🇺</span>
-    <span class="lncu-o2sim-flag-placeholder" data-lang="ar"  title="Syrien – Arabisch">🇸🇾</span>
-    <span class="lncu-o2sim-flag-placeholder" data-lang="ro"  title="Rumänien – Rumänisch">🇷🇴</span>
-  </div>
-
-  <!-- Spalte 2 (maximaler Raum): Spritzen-Canvas, L-förmig, Legende künftig unten links im Canvas -->
-  <div class="lncu-o2sim-canvas-box">
-    <canvas id="lncu-o2sim-canvas"></canvas>
-
     <!-- Steuerzeile: Phase 1 (Spritze 1 → Spritze 2) / Phase 2 (Restluft Spritze 2 → Spritze 1) -->
     <div class="lncu-o2sim-control-row" role="group" aria-label="Steuerung: Gasüberführung zwischen den Spritzen">
-      <button type="button" id="lncu-o2sim-btn-toS2" class="lncu-o2sim-icon-switch"
+      <button type="button" class="lncu-o2sim-icon-switch lncu-o2sim-btn-toS2"
               title="Start: Stempel von Spritze 1 drücken – Inhalt nach Spritze 2 überführen">
         <!-- Symbol 1: kleine waagerechte Spritze, Öffnung (Düse) nach rechts -->
         <svg class="lncu-o2sim-switch-icon" width="26" height="26" viewBox="0 0 28 28" aria-hidden="true">
@@ -212,7 +204,7 @@
         </svg>
         <span class="lncu-o2sim-sr-only">Start: Inhalt von Spritze 1 nach Spritze 2 überführen</span>
       </button>
-      <button type="button" id="lncu-o2sim-btn-toS1" class="lncu-o2sim-icon-switch" disabled
+      <button type="button" class="lncu-o2sim-icon-switch lncu-o2sim-btn-toS1" disabled
               title="Start: Restluft aus Spritze 2 zurück nach Spritze 1 überführen">
         <!-- Symbol 2: kleine senkrechte Spritze, Öffnung (Düse) nach oben -->
         <svg class="lncu-o2sim-switch-icon" width="26" height="26" viewBox="0 0 28 28" aria-hidden="true">
@@ -234,14 +226,44 @@
         <span class="lncu-o2sim-sr-only">Start: Restluft aus Spritze 2 zurück nach Spritze 1 überführen</span>
       </button>
     </div>
+    <span class="lncu-o2sim-flags-label">Sprache</span>
+    <span class="lncu-o2sim-flag-placeholder" data-lang="de"  title="Deutschland – Deutsch">🇩🇪</span>
+    <span class="lncu-o2sim-flag-placeholder" data-lang="ur"  title="Pakistan – Urdu">🇵🇰</span>
+    <span class="lncu-o2sim-flag-placeholder" data-lang="ar"  title="Irak – Arabisch">🇮🇶</span>
+    <span class="lncu-o2sim-flag-placeholder" data-lang="tr"  title="Türkei – Türkisch">🇹🇷</span>
+    <span class="lncu-o2sim-flag-placeholder" data-lang="sq"  title="Kosovo – Albanisch">🇽🇰</span>
+    <span class="lncu-o2sim-flag-placeholder" data-lang="sq"  title="Albanien – Albanisch">🇦🇱</span>
+    <span class="lncu-o2sim-flag-placeholder" data-lang="prs" title="Afghanistan – Dari">🇦🇫</span>
+    <span class="lncu-o2sim-flag-placeholder" data-lang="ar"  title="Marokko – Arabisch">🇲🇦</span>
+    <span class="lncu-o2sim-flag-placeholder" data-lang="uk"  title="Ukraine – Ukrainisch">🇺🇦</span>
+    <span class="lncu-o2sim-flag-placeholder" data-lang="en"  title="England – Englisch">🇬🇧</span>
+    <span class="lncu-o2sim-flag-placeholder" data-lang="ru"  title="Russland – Russisch">🇷🇺</span>
+    <span class="lncu-o2sim-flag-placeholder" data-lang="ar"  title="Syrien – Arabisch">🇸🇾</span>
+    <span class="lncu-o2sim-flag-placeholder" data-lang="ro"  title="Rumänien – Rumänisch">🇷🇴</span>
+
+    <button type="button" class="lncu-o2sim-icon-switch lncu-o2sim-btn-restart"
+            title="Simulation auf den Ausgangszustand zurücksetzen">
+      <span class="lncu-o2sim-switch-arrow" aria-hidden="true">↻</span>
+      <span>Neu starten</span>
+    </button>
+  </div>
+
+  <!-- Spalte 2 (maximaler Raum): Spritzen-Canvas, L-förmig, Legende künftig unten links im Canvas -->
+  <div class="lncu-o2sim-canvas-box">
+    <canvas class="lncu-o2sim-canvas"></canvas>
   </div>
 
   <!-- Spalte 3 (schmal, minimal): O2-Symbol – Wert – Regler – Skalenende – O2-Symbol -->
   <div class="lncu-o2sim-slider-col">
-    <svg width="28" height="28" viewBox="0 0 28 28" style="flex-shrink:0">
+    <svg width="35" height="35" viewBox="0 0 40 40" class="lncu-o2sim-switch-icon">
       <!-- Verlauf identisch zur blauen O2-Kugel in Legende/Simulation
            (drawLegendSphere/drawParticleList) — fachliche Simulationsfarbe,
-           hier als SVG-Pendant nachgebildet, Symbolgröße unverändert -->
+           hier als SVG-Pendant nachgebildet. Statt Beschriftung umgeben drei
+           unterschiedlich große Fragezeichen (Schriftgröße verdoppelt ggü.
+           Erstfassung) die Kugel halbkreisförmig von oben: Sinnbild für den
+           noch unbekannten/einzustellenden O2-Anteil. Kugelgröße unverändert,
+           Canvas entsprechend vergrößert, damit die größeren Zeichen
+           unbeschnitten Platz finden. -->
       <defs>
         <radialGradient id="lncu-o2sim-o2-icon-grad" cx="50%" cy="50%" r="43%" fx="37%" fy="36%">
           <stop offset="0%"   stop-color="#cfe3ff"/>
@@ -249,13 +271,17 @@
           <stop offset="100%" stop-color="#0d3a73"/>
         </radialGradient>
       </defs>
-      <circle cx="14" cy="14" r="12" fill="url(#lncu-o2sim-o2-icon-grad)" stroke="#06264a" stroke-width="1.4"/>
-      <text x="14" y="19" text-anchor="middle" fill="white" font-size="11"
-            font-weight="bold" font-family="Arial">O₂</text>
+      <circle cx="20" cy="27" r="9" fill="url(#lncu-o2sim-o2-icon-grad)" stroke="#06264a" stroke-width="1.4"/>
+      <text x="20" y="15" text-anchor="middle" font-family="Arial" font-weight="bold"
+            fill="var(--bricks-color-akzent-100, #ff6a00)" font-size="18">?</text>
+      <text x="7"  y="22" text-anchor="middle" font-family="Arial" font-weight="bold"
+            fill="var(--bricks-color-akzent-100, #ff6a00)" font-size="10">?</text>
+      <text x="33" y="22" text-anchor="middle" font-family="Arial" font-weight="bold"
+            fill="var(--bricks-color-akzent-100, #ff6a00)" font-size="14">?</text>
     </svg>
-    <span id="lncu-o2sim-label" class="lncu-o2sim-pct-label">20&thinsp;% O₂</span>
+    <span class="lncu-o2sim-pct-label">20&thinsp;% O₂</span>
     <span class="lncu-o2sim-scale-label">100&thinsp;%</span>
-    <input type="range" id="lncu-o2sim-slider" class="lncu-o2sim-slider"
+    <input type="range" class="lncu-o2sim-slider"
            min="0" max="20" step="1" value="10">
     <span class="lncu-o2sim-scale-label">0&thinsp;%</span>
   </div>
@@ -265,16 +291,53 @@
 (function () {
   'use strict';
 
+  /* Mehrfach-Sicherheit (z. B. „Teil A" + „Teil B" auf einer Seite):
+     document.currentScript zeigt zuverlässig auf GENAU dieses <script>-
+     Tag — aber nur, solange es synchron beim Parsen ausgelesen wird.
+     Beim späteren init()-Aufruf (ggf. erst nach DOMContentLoaded) wäre
+     der Wert bereits null. Daher hier, ganz am Anfang, sichern. */
+  const scriptEl = document.currentScript;
+
   function init() {
-    const canvas  = document.getElementById('lncu-o2sim-canvas');
-    const slider  = document.getElementById('lncu-o2sim-slider');
-    const labelEl = document.getElementById('lncu-o2sim-label');
-    const btnToS2 = document.getElementById('lncu-o2sim-btn-toS2');
-    const btnToS1 = document.getElementById('lncu-o2sim-btn-toS1');
-    const flagsLabelEl = document.getElementById('lncu-o2sim-flags-label');
-    const flagEls      = document.querySelectorAll('.lncu-o2sim-flag-placeholder');
+    /* Eigene Wurzel statt globaler IDs: im Regelfall liegt das zugehörige
+       lncu-o2sim-root als Geschwister-Knoten direkt vor diesem <script>.
+       Manche Umgebungen (z. B. Bricks auf der Live-Seite) reihen Style/
+       HTML/Script jedoch in einer anderen Reihenfolge — dort war der
+       direkte Vorgänger ein <style>-Element statt der Wurzel. Da auch
+       so ein Element "truthy" ist, griff der bisherige ||-Fallback nie,
+       root zeigte ins Leere und init() brach lautlos ab (leeres Canvas,
+       statische HTML-Defaults). Daher zusätzlich die Klasse prüfen —
+       nur ein wirklicher Treffer zählt, sonst zählt der dokumentweite
+       Fallback (oder bei Mehrfacheinsatz: der erste Treffer). */
+    const sib  = scriptEl && scriptEl.previousElementSibling;
+    const root = (sib && sib.classList.contains('lncu-o2sim-root') && sib)
+              || document.querySelector('.lncu-o2sim-root');
+    if (!root) return;
+
+    const canvas  = root.querySelector('.lncu-o2sim-canvas');
+    const slider  = root.querySelector('.lncu-o2sim-slider');
+    const labelEl = root.querySelector('.lncu-o2sim-pct-label');
+    const btnToS2 = root.querySelector('.lncu-o2sim-btn-toS2');
+    const btnToS1 = root.querySelector('.lncu-o2sim-btn-toS1');
+    const btnRestart = root.querySelector('.lncu-o2sim-btn-restart');
+    const flagsLabelEl = root.querySelector('.lncu-o2sim-flags-label');
+    const flagEls      = root.querySelectorAll('.lncu-o2sim-flag-placeholder');
     if (!canvas || !slider || !labelEl || !btnToS2 || !btnToS1) return;
     const ctx = canvas.getContext('2d');
+
+    /* SVG-<radialGradient>-IDs sind dokumentweit eindeutig zu halten:
+       url(#...)-Referenzen lösen gegen die ERSTE passende ID im GESAMTEN
+       Dokument auf — eine zweite Instanz würde sonst still den Farb-
+       verlauf der ersten "klauen" (oder umgekehrt). Daher pro Instanz
+       einmalig mit Zufalls-Suffix umbenennen und Referenz(en) mitführen. */
+    const grad = root.querySelector('radialGradient[id]');
+    if (grad) {
+      const uniqueGradId = grad.id + '-' + Math.random().toString(36).slice(2, 8);
+      root.querySelectorAll(`[fill="url(#${grad.id})"]`).forEach(el => {
+        el.setAttribute('fill', `url(#${uniqueGradId})`);
+      });
+      grad.id = uniqueGradId;
+    }
 
     /* ── Sprachumschaltung ──
        Übersetzte Texte je Sprachcode (ISO 639; "prs" = Dari nach
@@ -452,10 +515,13 @@
         gx0: px + 1, gx1: bx1 - 1,
         gy0: by0 + 1, gy1: by1 - 1,
         vx0, vx1, bCx,
-        valveSize, valveS, valveR, valveStub,
-        /* Anschlusspunkt am unteren weiblichen Stutzen — hier dockt Spritze 2 an */
+        valveSize, valveS, valveR, valveStub, valveShift,
+        /* Anschlusspunkt am unteren weiblichen Stutzen — hier dockt Spritze 2 an.
+           Wie links bei Spritze 1 (vgl. valveShift-Kommentar oben) greift das
+           Luer-Lock-Gewinde sichtbar in den Hahn-Stutzen hinein, statt nur an
+           dessen Kante zu stoßen — daher um valveShift nach oben verschoben. */
         vBottomX: bCx,
-        vBottomY: cy + valveR + valveStub,
+        vBottomY: cy + valveR + valveStub - valveShift,
       };
     }
 
@@ -549,11 +615,13 @@
       canvas.width        = Math.round(W * dpr);
       canvas.height       = Math.round(H * dpr);
       canvas.style.height = H + 'px';
-      /* Schieberegler: 80 % der App-Höhe (Canvas-Höhe), zentriert → 10 % Freiraum oben/unten */
-      slider.style.height = Math.round(H * 0.8) + 'px';
+      /* Schieberegler: ca. 0,6 der bisherigen Höhe (0,8 × 0,6 = 0,48 der App-Höhe),
+         zentriert in der Spalte → mehr, gleich großer Freiraum oben/unten */
+      slider.style.height = Math.round(H * 0.48) + 'px';
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       computeGeometry();
       computeGeometry2();
+      computeCameraFocus();
       R = Math.max(3, Math.round(
         Math.sqrt((G.gx1 - G.gx0) * (G.gy1 - G.gy0) * 0.07 / (N * Math.PI))
       ));
@@ -908,6 +976,52 @@
       ctx.fillStyle = sheenGrad;
       /* only over the outer barrel shell (not ears/rod) */
       ctx.fillRect(bx0, oy0, bx1 - bx0, (oy1 - oy0) * 0.45);
+      ctx.restore();
+    }
+
+    /* ── Ablese-Pfeil: zeigt am Simulationsende auf den exakten Füllstand ──
+       Wenn der Rücktransfer abgeschlossen ist und der Kolben steht, hilft ein
+       deutlich sichtbarer Pfeil beim Ablesen — die Form des Kolbenstopfens
+       erschwert das sonst. Zielposition exakt wie die interne Volumen-
+       Buchhaltung der Animation (vgl. toVol1 in startTransferToS1):
+       verbleibende Teilchen × ML_PER_PARTICLE = mL-Wert, auf den der Pfeil zeigt. */
+    function drawReadingArrow(geo = G) {
+      if (transferPhase !== 'doneToS1' || transferAnim || reactionAnim) return;
+      const { bx1, bw, by1, oy1, bih } = geo;
+
+      const remaining = particles.filter(p => p.loc === 'S1' && p.phase === 'normal').length;
+      const targetMl  = remaining * ML_PER_PARTICLE;
+      const arrowX    = bx1 - targetMl * (bw / 60);
+
+      /* Spitze knapp unterhalb einer evtl. mL-Beschriftung (die über den
+         Haupt-Tickmarken sitzt); Schaft beginnt unterhalb der Spritze und
+         legt sich dabei teilweise über die Skalen-Markierungen. */
+      const tipY    = by1 - bih * 0.24;
+      const tailY   = oy1 + bih * 0.12;
+      const headLen  = bih * 0.16;
+      const headHalf = bih * 0.085;
+      const shaftW   = Math.max(1.5, bih * 0.045);
+
+      const arrowColor = getComputedStyle(document.documentElement)
+                           .getPropertyValue('--bricks-color-akzent-100').trim() || '#ff6a00';
+
+      ctx.save();
+      ctx.fillStyle   = arrowColor;
+      ctx.strokeStyle = arrowColor;
+      ctx.lineWidth   = shaftW;
+      ctx.lineCap     = 'round';
+
+      ctx.beginPath();
+      ctx.moveTo(arrowX, tailY);
+      ctx.lineTo(arrowX, tipY + headLen);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(arrowX,            tipY);
+      ctx.lineTo(arrowX - headHalf, tipY + headLen);
+      ctx.lineTo(arrowX + headHalf, tipY + headLen);
+      ctx.closePath();
+      ctx.fill();
       ctx.restore();
     }
 
@@ -1477,11 +1591,19 @@
       ctx.restore();
     }
 
-    function drawLegend() {
+    function drawLegend(cam) {
+      /* Die Legende sitzt bewusst außerhalb der Kamera-Zoom-Transformation
+         (bildschirmfest, siehe frame()) — ihre "freier Raum unten links"-
+         Ecke wird daher hier aus Weltkoordinaten in Bildschirmkoordinaten
+         der AKTUELLEN Kamera umgerechnet, statt die rohen G-Werte zu nutzen
+         (sonst würde sie beim Hineinzoomen vom vergrößerten Zylinder verdeckt). */
+      const toScreenX = wx => W / 2 + (wx - cam.cx) * cam.scale;
+      const toScreenY = wy => H / 2 + (wy - cam.cy) * cam.scale;
+
       const margin = W * 0.025;
       const x0 = margin;
-      const x1 = G.bCx - (G.bih / 2 + G.bwall) - margin;
-      const y0 = G.oy1 + margin;
+      const x1 = toScreenX(G.bCx - (G.bih / 2 + G.bwall)) - margin;
+      const y0 = toScreenY(G.oy1) + margin;
       const y1 = H - margin;
       if (x1 - x0 < margin || y1 - y0 < margin) return;   // zu wenig Platz (extreme Seitenverhältnisse)
 
@@ -1528,6 +1650,51 @@
     }
 
     /* ════════════════════════════════════
+       INTRO-KAMERAFAHRT
+       App-Start: 1 s lang das ganze Setting zeigen, danach weich auf
+       die fokussierte Ansicht (Spritze 1 + Hahn + Spritze 2 füllen das
+       Bild) zoomen. Reine Kamera-Transformation um die bestehenden
+       Zeichenroutinen — Geometrie/Physik bleiben unverändert in
+       Weltkoordinaten, nur der sichtbare Ausschnitt ändert sich.
+    ════════════════════════════════════ */
+    const INTRO_HOLD_MS = 1000;   // Dauer der Übersichts-Phase
+    const INTRO_ZOOM_MS = 1000;   // Dauer der Zoom-Überblendung
+    let introT0  = null;
+    let camFocus = { scale: 1, cx: 0, cy: 0 };
+
+    function easeInOutCubic(t) {
+      return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    }
+
+    /* Ziel-Ausschnitt: Rechteck um Spritze 1 + Hahn + Spritze 2 (ohne die
+       weit herausgezogenen Kolbenstangen — die dürfen im fokussierten Bild
+       bewusst über den Rand hinausragen; das Canvas schneidet sie automatisch
+       ab, siehe Diskussion zur "fokussierten Ansicht"). */
+    function computeCameraFocus() {
+      const x0 = Math.min(G.bx0, G.vBottomX - (G.bih / 2 + G.bwall));
+      const x1 = Math.max(G.vx1, G.vBottomX + (G.bih / 2 + G.bwall));
+      const y0 = Math.min(G.oy0, G.cy - G.valveR);
+      const y1 = G.vBottomY + G.luerW + G.nozzleW + G.bw + G.bwall;
+
+      const PAD = 0.92;   // ~8 % Luft rundherum, statt randscharf zuzuschneiden
+      const scale = Math.min(W / (x1 - x0), H / (y1 - y0)) * PAD;
+      camFocus = { scale, cx: (x0 + x1) / 2, cy: (y0 + y1) / 2 };
+    }
+
+    /* liefert die Kamera für den aktuellen Zeitpunkt: erst Identität
+       (volle Übersicht), dann weiche Überblendung zu camFocus */
+    function cameraTransform(elapsedMs) {
+      if (elapsedMs <= INTRO_HOLD_MS) return { scale: 1, cx: W / 2, cy: H / 2 };
+      const t = Math.min(1, (elapsedMs - INTRO_HOLD_MS) / INTRO_ZOOM_MS);
+      const e = easeInOutCubic(t);
+      return {
+        scale: 1       + (camFocus.scale - 1)     * e,
+        cx:    (W / 2) + (camFocus.cx    - W / 2) * e,
+        cy:    (H / 2) + (camFocus.cy    - H / 2) * e,
+      };
+    }
+
+    /* ════════════════════════════════════
        MAIN LOOP
     ════════════════════════════════════ */
     let running = true;
@@ -1536,19 +1703,41 @@
       if (running) requestAnimationFrame(frame);
     });
 
+    /* Punkt 8 (Dark-Mode-Redraw): kein separater MutationObserver nötig —
+       die Render-Loop läuft kontinuierlich (~60 fps, solange running=true)
+       und liest UI-Farben (z. B. Legenden-Text via getComputedStyle in
+       drawLegend) bei jedem Durchlauf frisch aus. Ein Theme-Wechsel über
+       data-brx-theme erscheint dadurch ohnehin binnen eines Frames — ein
+       zusätzlicher Observer würde denselben Redraw nur redundant auslösen. */
     function frame(now) {
+      if (introT0 === null) introT0 = now;
+      const cam = cameraTransform(now - introT0);
+
       updateTransferAnimation(now);
       updateTransferFades(now);
       updateO2Reaction(now);
       updateVanishing(now);
       step();
       ctx.clearRect(0, 0, W, H);
+
+      /* Kamera nur um die Baugruppe legen — die Legende bleibt
+         bildschirmfest (UI-Layer, soll beim Hineinzoomen weder
+         mitwandern noch mitwachsen). */
+      ctx.save();
+      ctx.translate(W / 2, H / 2);
+      ctx.scale(cam.scale, cam.scale);
+      ctx.translate(-cam.cx, -cam.cy);
       drawSyringeBack();    // barrel fill (white/gray zones)
       drawParticleList(particles.filter(p => p.loc === 'S1'));  // particles INSIDE barrel 1
       drawSyringeFore();    // outlines, piston, rod, flange, nozzle — on top
-      drawValve();          // Dreiwegehahn
+      drawReadingArrow();   // Lesehilfe-Pfeil, sobald die Simulation am Endstand steht
       drawSyringe2();       // Spritze 2 (senkrecht, am unteren Hahn-Anschluss)
-      drawLegend();         // Erklärung der Farben/Symbole, unten links im freien Raum
+      drawValve();          // Dreiwegehahn zuletzt → im Vordergrund, umgreift sichtbar
+                            // beide Luer-Lock-Anschlüsse (links UND unten), statt von
+                            // Spritze 2's heller Gewinde-Füllung verdeckt zu werden
+      ctx.restore();
+
+      drawLegend(cam);      // Erklärung der Farben/Symbole, unten links im freien Raum (kamerabewusste Position)
       if (running) requestAnimationFrame(frame);
     }
 
@@ -1576,6 +1765,10 @@
       setTransferPhase('toS1');
       startTransferToS1();   // Stempel- + Teilchen-Animation, Restgas zurück nach Spritze 1
     });
+
+    /* Neustart: Geometrie/Stempel/Teilchen auf Anfangszustand zurücksetzen
+       (resize() reicht aus – sie setzt alle Positionen + Phasen + Teilchen neu auf) */
+    btnRestart.addEventListener('click', () => resize());
 
     const ro = new ResizeObserver(() => resize());
     ro.observe(canvas.parentElement);
