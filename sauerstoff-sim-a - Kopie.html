@@ -205,8 +205,8 @@
   }
   .lncu-o2sim-sr-only {
     position: absolute;
-    width: 1px;
-    height: 1px;
+    width: 0.1rem;
+    height: 0.1rem;
     margin: -1px;
     padding: 0;
     overflow: hidden;
@@ -1819,7 +1819,8 @@
       if (running) requestAnimationFrame(frame);
     });
 
-    /* Punkt 8 (Dark-Mode-Redraw): kein separater MutationObserver nötig —
+    /* kein-theme-observer: die Render-Schleife laeuft dauerhaft.
+       Punkt 8 (Dark-Mode-Redraw): kein separater MutationObserver nötig —
        die Render-Loop läuft kontinuierlich (~60 fps, solange running=true)
        und liest UI-Farben (z. B. Legenden-Text via getComputedStyle in
        drawLegend) bei jedem Durchlauf frisch aus. Ein Theme-Wechsel über
