@@ -8,12 +8,128 @@
   html { font-size: 10px; }
   body { margin: 0; padding: 2rem; background: #dde6ee; }
 </style>
+<!-- LNCU-TESTPALETTE-START  (erzeugt von werkzeuge/palette_ziehen.py
+     aus https://lncu.davidweninger.de/wp-content/uploads/bricks/css/color-palettes.min.css, Stand 2026-10-03.
+     NICHT von Hand bearbeiten und NICHT nach Bricks kopieren:
+     auf lncu.de bringt das Theme diese Variablen selbst mit. -->
+<style>
+  :root {
+    --bricks-color-akzent-100: #ff6a00;
+    --bricks-color-akzent-200: #ffa666;
+    --bricks-color-akzent-300: #ffb580;
+    --bricks-color-akzent-400: #ffd2b3;
+    --bricks-color-akzent-500: #ffe1cc;
+    --bricks-color-akzent-600: #fff0e5;
+    --bricks-color-akzent-transparent: hsla(25, 100%, 50%, 0.7);
+    --bricks-color-blue-100: #2e4760;
+    --bricks-color-blue-200: #98b2cd;
+    --bricks-color-blue-300: #a9bfd6;
+    --bricks-color-blue-400: #cbd9e6;
+    --bricks-color-blue-500: #dde6ee;
+    --bricks-color-blue-600: #eef2f7;
+    --bricks-color-green-100: #2e6b57;
+    --bricks-color-green-200: #94d1bd;
+    --bricks-color-green-300: #a6d9c8;
+    --bricks-color-green-400: #c9e8de;
+    --bricks-color-green-500: #dbf0e9;
+    --bricks-color-green-600: #edf7f1;
+    --bricks-color-turkis-100: #0d5959;
+    --bricks-color-turkis-200: #138686;
+    --bricks-color-turkis-300: #8fefef;
+    --bricks-color-turkis-400: #bcf5f5;
+    --bricks-color-turkis-500: #d2f9f9;
+    --bricks-color-turkis-600: #e9fcfc;
+    --bricks-color-violet-100: #7700cc;
+    --bricks-color-violet-200: #b133ff;
+    --bricks-color-violet-300: #ce80ff;
+    --bricks-color-violet-400: #e2b3ff;
+    --bricks-color-violet-500: #ebccff;
+    --bricks-color-violet-600: #f5e5ff;
+    --bricks-color-red-100: #e60039;
+    --bricks-color-red-200: #ff3366;
+    --bricks-color-red-300: #ff809f;
+    --bricks-color-red-400: #ffb3c6;
+    --bricks-color-red-500: #ffccd9;
+    --bricks-color-red-600: #ffe5ec;
+    --bricks-color-yellow-100: #998000;
+    --bricks-color-yellow-200: #ffdd33;
+    --bricks-color-yellow-300: #ffea80;
+    --bricks-color-yellow-400: #fff2b3;
+    --bricks-color-yellow-500: #fff6cc;
+    --bricks-color-yellow-600: #fffbe5;
+    --bricks-color-gray-100: #333333;
+    --bricks-color-gray-200: #999999;
+    --bricks-color-gray-300: #bfbfbf;
+    --bricks-color-gray-400: #d9d9d9;
+    --bricks-color-gray-500: #e6e6e6;
+    --bricks-color-gray-600: #f2f2f2;
+    --bricks-color-white: #ffffff;
+    --bricks-color-black: #000000;
+    --bricks-color-darken-transparent: hsla(0, 0%, 0%, 0.1);
+  }
+  :root[data-brx-theme="dark"] {
+    --bricks-color-akzent-100: #f8b785;
+    --bricks-color-akzent-200: #f8b785;
+    --bricks-color-akzent-300: #f8b785;
+    --bricks-color-akzent-400: #705a49;
+    --bricks-color-akzent-500: #473d36;
+    --bricks-color-akzent-600: #3d3b3b;
+    --bricks-color-akzent-transparent: hsla(26, 89%, 75%, 0.7);
+    --bricks-color-blue-100: #d1edff;
+    --bricks-color-blue-200: #94d4ff;
+    --bricks-color-blue-300: #608fb3;
+    --bricks-color-blue-400: #37536d;
+    --bricks-color-blue-500: #323b44;
+    --bricks-color-blue-600: #141a1e;
+    --bricks-color-green-100: #c4e3da;
+    --bricks-color-green-200: #7cbfac;
+    --bricks-color-green-300: #4a8974;
+    --bricks-color-green-400: #476061;
+    --bricks-color-green-500: #334546;
+    --bricks-color-green-600: #283737;
+    --bricks-color-turkis-100: #b2f1f3;
+    --bricks-color-turkis-200: #549598;
+    --bricks-color-turkis-300: #107070;
+    --bricks-color-turkis-400: #204447;
+    --bricks-color-turkis-500: #1a3033;
+    --bricks-color-turkis-600: #182b2e;
+    --bricks-color-violet-100: #e3cafc;
+    --bricks-color-violet-200: #bc80f9;
+    --bricks-color-violet-300: #6527b7;
+    --bricks-color-violet-400: #40276a;
+    --bricks-color-violet-500: #2f2050;
+    --bricks-color-violet-600: #261d40;
+    --bricks-color-red-100: #d82c3a;
+    --bricks-color-red-200: #f04965;
+    --bricks-color-red-300: #f3879e;
+    --bricks-color-red-400: #8b6c75;
+    --bricks-color-red-500: #4d3941;
+    --bricks-color-red-600: #362a31;
+    --bricks-color-yellow-100: #fee88b;
+    --bricks-color-yellow-200: #b9ad6d;
+    --bricks-color-yellow-300: #726e4b;
+    --bricks-color-yellow-400: #5b5940;
+    --bricks-color-yellow-500: #444435;
+    --bricks-color-yellow-600: #2d2f2a;
+    --bricks-color-gray-100: #f0f3f5;
+    --bricks-color-gray-200: #b5c1cb;
+    --bricks-color-gray-300: #788fa2;
+    --bricks-color-gray-400: #4a5c6a;
+    --bricks-color-gray-500: #3b4955;
+    --bricks-color-gray-600: #2c373f;
+    --bricks-color-white: #212a31;
+    --bricks-color-black: #ffffff;
+    --bricks-color-darken-transparent: hsl(0 0% 100% / 0.1);
+  }
+</style>
+<!-- LNCU-TESTPALETTE-ENDE -->
 </head>
 <body>
 
 <!-- ═══════════════════════════════════════════════════
      BRICKS CODE ELEMENT – alles ab hier einfügen
 ═══════════════════════════════════════════════════ -->
+<!-- LNCU-BRICKS-START -->
 <style>
   .lncu-o2sim-root {
     font-size: 1.6rem;
@@ -1891,6 +2007,6 @@
 <!-- ═══════════════════════════════════════════════════
      ENDE Bricks Code Element
 ═══════════════════════════════════════════════════ -->
-
+<!-- LNCU-BRICKS-ENDE -->
 </body>
 </html>
