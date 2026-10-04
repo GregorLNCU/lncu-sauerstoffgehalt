@@ -26,7 +26,7 @@ aufgelöst: alte Varianten gelöscht, Historie behalten.
 
 | Prüfung | Ergebnis |
 |---|---|
-| `standardcheck.py` (F1–F14) | **ohne Befund**, beide Fassungen |
+| `standardcheck.py` (F1–F16) | **ohne Befund**, beide Fassungen |
 | Ladeprobe im Browser | bestanden |
 | Sichtprüfung hell und dunkel | steht aus |
 | Didaktische Prüfung | steht aus |
@@ -47,12 +47,22 @@ als einzige bereits das vollständige Wurzelmuster mit `document.currentScript`.
   Observer vorher als Hinweis, obwohl die Entscheidung richtig und im
   Quelltext begründet war.
 
+## Was am 04.10.2026 geändert wurde (Kontrast)
+
+Nach der Neufassung von Standards §5.2 und der neuen Prüfregel F16 (Text
+mindestens 4,5 in hell **und** dunkel). Schrift auf Orange ist hell jetzt
+schwarz statt weiß (Entscheidung Gregor, 04.10.2026).
+
+- Pfeil-Schalter: dunkler Pfeil im orangen Rahmen (vorher 2,58); beim Überfahren schwarz auf Orange.
+- O₂-Prozentanzeige und Skalenbeschriftung: `gray-100`.
+- Dieselben Änderungen in `sauerstoff-sim-a - Kopie.html`.
+
 ## Prüfung vor einer Veröffentlichung
 
 Werkzeuge liegen zentral in `C:\Users\grego\.claude\Standards`:
 
 ```
-python werkzeuge/standardcheck.py "<Datei>.html"     # Form, F1–F14
+python werkzeuge/standardcheck.py "<Datei>.html"     # Form, F1–F16
 bash   werkzeuge/sichtpruefung.sh "<Datei>.html"     # sechs Bilder + Überlaufmessung
 ```
 

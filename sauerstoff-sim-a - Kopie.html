@@ -144,6 +144,16 @@
     align-items: stretch;
     gap: 1.5rem;
   }
+
+  /* Schrift auf Akzentflaechen (Standards 5.2): Auf akzent-100 ist keine
+     Palettenfarbe in beiden Modi lesbar. Hell schwarz (7,31), dunkel die
+     dunkle "white"-Variable (8,40). */
+  .lncu-o2sim-root {
+    --lncu-o2sim-auf-akzent: var(--bricks-color-black, #000000);
+  }
+  [data-brx-theme="dark"] .lncu-o2sim-root {
+    --lncu-o2sim-auf-akzent: var(--bricks-color-white, #212a31);
+  }
   .lncu-o2sim-canvas-box {
     background-color: var(--bricks-color-white, #ffffff);
     border-radius: 1rem;
@@ -177,7 +187,9 @@
     font-weight: bold;
     font-family: inherit;
     line-height: 1;
-    color: var(--bricks-color-akzent-100, #ff6a00);
+    /* Pfeil dunkel, Orange nur als Rahmen: akzent-100 auf akzent-600
+       hat hell nur 2,58 (Standards 5.2). */
+    color: var(--bricks-color-gray-100, #333333);
     background-color: var(--bricks-color-akzent-600, #fff0e5);
     border: 0.15rem solid var(--bricks-color-akzent-100, #ff6a00);
     border-radius: 0.6rem;
@@ -187,7 +199,7 @@
   }
   .lncu-o2sim-icon-switch:hover:not(:disabled) {
     background-color: var(--bricks-color-akzent-100, #ff6a00);
-    color: var(--bricks-color-white, #ffffff);
+    color: var(--lncu-o2sim-auf-akzent);
   }
   .lncu-o2sim-icon-switch:disabled {
     opacity: 0.35;
@@ -280,7 +292,7 @@
   .lncu-o2sim-pct-label {
     font-size: 1.5rem;
     font-weight: bold;
-    color: var(--bricks-color-akzent-100, #ff6a00);
+    color: var(--bricks-color-gray-100, #333333);
     text-align: center;
     display: inline-block;
     min-width: 7rem;   /* feste Breite für den längsten Wert "100 % O₂" → kein Layoutsprung bei 95 %→100 % */
@@ -289,7 +301,7 @@
   .lncu-o2sim-scale-label {
     font-size: 1.05rem;
     font-weight: 600;
-    color: var(--bricks-color-gray-200, #999999);
+    color: var(--bricks-color-gray-100, #333333);
     text-align: center;
   }
 </style>
